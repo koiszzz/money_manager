@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/route/edit_record/down_option.dart';
 import 'calculator.dart';
 
 class EditRecordWidget extends StatefulWidget {
@@ -168,7 +169,25 @@ class _EditRecordState extends State<EditRecordWidget>
             child: MyCalculatorWidget(
               key: _selectedItem.key,
               controller: _selectedItem.textController,
-              // onChange: _calChange,
+            ),
+          ),
+        ));
+        break;
+      case FormItemType.select:
+        bottomChildren.add(Flexible(
+          child: Container(
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: const Offset(0, 3), // changes position of shadow
+              ),
+            ]),
+            child: MyDownOptionWidget(
+              key: _selectedItem.key,
+              dataType: _selectedItem.label,
+              controller: _selectedItem.textController,
             ),
           ),
         ));
