@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/route/edit_record/edit_record_stateless.dart';
 import 'package:money_manager/route/profile.dart';
 
-import 'edit_record/edit_record.dart';
 import 'home.dart';
 
 class MyMainPage extends StatefulWidget {
   const MyMainPage({super.key, required this.title});
-
+  static String routeName = '/';
   final String title;
 
   @override
@@ -39,10 +39,12 @@ class _MyMainPageState extends State<MyMainPage> {
           ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const EditRecordWidget()));
+          Navigator.pushNamed(context, EditRecordStateless.routeName,
+              arguments: {"id": ''}).then((value) {
+            if (value != null) {
+              setState(() {});
+            }
+          });
         },
         tooltip: '记一笔',
         child: const Icon(Icons.add),
