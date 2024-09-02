@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:money_manager/route/edit_record/edit_record_stateless.dart';
+import 'package:money_manager/base_service.dart';
+import 'package:money_manager/route/edit_record_page.dart';
 import 'package:money_manager/route/main_page.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await setup();
   runApp(const MyApp());
 }
 
@@ -21,7 +24,7 @@ class MyApp extends StatelessWidget {
       routes: {
         MyMainPage.routeName: (context) =>
             const MyMainPage(title: 'Flutter Demo Home Page'),
-        EditRecordStateless.routeName: (context) => const EditRecordStateless(),
+        EditRecordPage.routeName: (context) => EditRecordPage()
       },
     );
   }

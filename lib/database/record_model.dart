@@ -1,4 +1,26 @@
 class RecordModel {
+  static String tableTrade = 'trade_record';
+
+  static String create() {
+    return "CREATE TABLE $tableTrade ("
+        "id TEXT primary key,"
+        "amount REAL,"
+        "date TEXT,"
+        "type TEXT,"
+        "typeId TEXT,"
+        "account TEXT,"
+        "accountId TEXT,"
+        "parentTypeId TEXT,"
+        "involves TEXT,"
+        "toAccount TEXT,"
+        "toAccountId TEXT,"
+        "project TEXT,"
+        "merchant TEXT,"
+        "merchantId TEXT,"
+        "desc TEXT"
+        ")";
+  }
+
   RecordModel(
       {this.id,
       this.date,
@@ -37,7 +59,7 @@ class RecordModel {
     var map = <String, dynamic>{};
     map['id'] = id;
     map['amount'] = amount;
-    map['date'] = date;
+    map['date'] = date ?? DateTime.now().toIso8601String();
     map['account'] = account;
     map['accountId'] = accountId;
     map['type'] = type;
