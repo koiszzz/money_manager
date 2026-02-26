@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bookkeeper Pro - PIN Lock</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                        "surface-dark": "#1c2632",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 flex flex-col min-h-screen selection:bg-primary/30 selection:text-primary">
+<div class="flex-1 flex flex-col w-full max-w-md mx-auto relative overflow-hidden bg-background-light dark:bg-background-dark shadow-2xl h-screen">
+<!-- Header / Top Bar -->
+<header class="flex items-center justify-center p-6 pt-12 pb-4 z-10">
+<div class="flex items-center gap-2">
+<div class="text-primary bg-primary/10 p-2 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined !text-[28px]">lock</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Bookkeeper Pro</h1>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center justify-start px-6 pt-6 pb-4 w-full">
+<!-- Hero Image / Visual -->
+<div class="w-full mb-8 relative group">
+<div class="w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg relative bg-surface-dark">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 to-transparent z-10"></div>
+<div class="w-full h-full bg-cover bg-center opacity-80" data-alt="Modern financial graph and analytics dashboard" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXmiFd31Dmyc10LJLcy6gvN4T9OGq_u9Wd0eNFGMSO9g_z4rotaNzZs7CZP2i4yyBlwEESYD74VZxwgrFdXExiwEujwSdrh9zmowDC302P6fyAre3IjwaDTr5ghZR_mCJEgqhFVNftBtADzJRLm82AJVluqX_gzRXDzdMEb8QHPZkJySt1HOeQUy3tNjHX9jHb2AA8gUKb3a_1J0KVU7o98d8EE49Lzcm-RyeoReoJgknMs73KaHmYE-dVB0XeQY-9Lhqooszug1y1');">
+</div>
+<div class="absolute bottom-4 left-4 z-20">
+<div class="flex items-center gap-2 text-white/90 mb-1">
+<span class="material-symbols-outlined text-primary text-sm">shield</span>
+<span class="text-xs font-medium uppercase tracking-wider">Secure Access</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Welcome Text -->
+<div class="text-center mb-8">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Welcome Back</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Enter your 4-digit PIN to access your finances</p>
+</div>
+<!-- PIN Display (Dots) -->
+<div class="flex justify-center gap-6 mb-8 w-full">
+<!-- Using visual dots instead of actual inputs for a better mobile PIN experience -->
+<div class="flex gap-6 items-center justify-center">
+<div class="w-4 h-4 rounded-full bg-primary border-2 border-primary transition-all duration-200"></div>
+<div class="w-4 h-4 rounded-full bg-primary border-2 border-primary transition-all duration-200"></div>
+<div class="w-4 h-4 rounded-full bg-transparent border-2 border-slate-300 dark:border-slate-600 transition-all duration-200"></div>
+<div class="w-4 h-4 rounded-full bg-transparent border-2 border-slate-300 dark:border-slate-600 transition-all duration-200"></div>
+</div>
+</div>
+<button class="text-primary text-sm font-medium hover:text-primary/80 transition-colors mb-auto">
+                Forgot PIN?
+            </button>
+<!-- Numeric Keypad -->
+<div class="w-full max-w-[300px] grid grid-cols-3 gap-y-6 gap-x-8 mb-6">
+<!-- Row 1 -->
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">1</button>
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">2</button>
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">3</button>
+<!-- Row 2 -->
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">4</button>
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">5</button>
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">6</button>
+<!-- Row 3 -->
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">7</button>
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">8</button>
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">9</button>
+<!-- Row 4 -->
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-primary hover:bg-primary/10 transition-colors active:scale-95">
+<span class="material-symbols-outlined !text-[32px]">face</span> <!-- FaceID Icon -->
+</button>
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-2xl font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">0</button>
+<button class="flex items-center justify-center w-full aspect-square rounded-full text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors active:scale-95">
+<span class="material-symbols-outlined !text-[28px]">backspace</span>
+</button>
+</div>
+<!-- Footer indicator (like iOS home indicator) -->
+<div class="h-1 w-32 bg-slate-300 dark:bg-slate-700 rounded-full mt-2"></div>
+</main>
+</div>
+</body></html>

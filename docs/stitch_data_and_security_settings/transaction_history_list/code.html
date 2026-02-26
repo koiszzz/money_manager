@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Transaction History List</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b7cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto border-x border-slate-200 dark:border-slate-800 shadow-2xl">
+<!-- Header Section -->
+<div class="sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-between px-4 py-3">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100" style="font-size: 24px;">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Transactions</h1>
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100" style="font-size: 24px;">more_vert</span>
+</button>
+</div>
+<!-- Search and Filter -->
+<div class="px-4 pb-4">
+<div class="flex gap-3">
+<div class="relative flex-1">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+<span class="material-symbols-outlined text-slate-400" style="font-size: 20px;">search</span>
+</div>
+<input class="block w-full p-2.5 pl-10 text-sm text-slate-900 border border-slate-300 rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 dark:placeholder-slate-400 dark:text-white focus:ring-primary focus:border-primary" placeholder="Search bills, notes..." type="text"/>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300" style="font-size: 20px;">filter_list</span>
+</button>
+</div>
+<!-- Quick Date Filters -->
+<div class="flex gap-2 mt-3 overflow-x-auto no-scrollbar pb-1">
+<button class="px-4 py-1.5 text-xs font-medium text-white bg-primary rounded-full whitespace-nowrap">All Time</button>
+<button class="px-4 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full whitespace-nowrap hover:bg-slate-200 dark:hover:bg-slate-700">This Month</button>
+<button class="px-4 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full whitespace-nowrap hover:bg-slate-200 dark:hover:bg-slate-700">Income</button>
+<button class="px-4 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full whitespace-nowrap hover:bg-slate-200 dark:hover:bg-slate-700">Expense</button>
+</div>
+</div>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto">
+<!-- Group: Today -->
+<div class="mt-2">
+<div class="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center sticky top-0 backdrop-blur-sm z-0">
+<span class="text-sm font-semibold text-slate-500 dark:text-slate-400">Today, 24 Oct</span>
+<span class="text-sm font-medium text-red-500">- $124.50</span>
+</div>
+<div class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Item 1: Normal -->
+<div class="group relative flex items-center gap-4 px-4 py-3.5 bg-background-light dark:bg-background-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">shopping_cart</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Grocery Shopping</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Chase Sapphire • 10:42 AM</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-red-500">- $82.40</p>
+</div>
+</div>
+<!-- Item 2: Swipe Action State -->
+<div class="relative overflow-hidden">
+<!-- Background Actions (Visible on Swipe) -->
+<div class="absolute inset-y-0 right-0 flex w-1/3">
+<button class="flex w-full items-center justify-center bg-red-600 text-white">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<!-- Foreground Content (Shifted for demo) -->
+<div class="relative flex items-center gap-4 px-4 py-3.5 bg-background-light dark:bg-background-dark -translate-x-16 shadow-lg border-r border-slate-800">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">local_taxi</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Uber Ride</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Amex Gold • 08:15 AM</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-red-500">- $24.50</p>
+</div>
+</div>
+</div>
+<!-- Item 3: Normal -->
+<div class="group relative flex items-center gap-4 px-4 py-3.5 bg-background-light dark:bg-background-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">movie</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Netflix Subscription</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Checking Account • Auto</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-red-500">- $17.60</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Group: Yesterday -->
+<div class="mt-2">
+<div class="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center sticky top-0 backdrop-blur-sm z-0">
+<span class="text-sm font-semibold text-slate-500 dark:text-slate-400">Yesterday, 23 Oct</span>
+<span class="text-sm font-medium text-emerald-500">+ $2,450.00</span>
+</div>
+<div class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Item 4: Income -->
+<div class="group relative flex items-center gap-4 px-4 py-3.5 bg-background-light dark:bg-background-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">account_balance_wallet</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Salary Deposit</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Main Checking • Tech Corp</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-emerald-500">+ $3,200.00</p>
+</div>
+</div>
+<!-- Item 5: Expense -->
+<div class="group relative flex items-center gap-4 px-4 py-3.5 bg-background-light dark:bg-background-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">restaurant</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Dinner at Mario's</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Cash • 08:30 PM</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-red-500">- $65.00</p>
+</div>
+</div>
+<!-- Item 6: Expense -->
+<div class="group relative flex items-center gap-4 px-4 py-3.5 bg-background-light dark:bg-background-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">checkroom</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Winter Coat</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Credit Card • Zara</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-red-500">- $185.00</p>
+</div>
+</div>
+<!-- Item 7: Expense -->
+<div class="group relative flex items-center gap-4 px-4 py-3.5 bg-background-light dark:bg-background-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">water_drop</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Water Bill</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Utility • Monthly</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-red-500">- $45.20</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Group: Previous -->
+<div class="mt-2 pb-24">
+<div class="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center sticky top-0 backdrop-blur-sm z-0">
+<span class="text-sm font-semibold text-slate-500 dark:text-slate-400">22 Oct</span>
+<span class="text-sm font-medium text-red-500">- $50.00</span>
+</div>
+<div class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Item 8: Transfer -->
+<div class="group relative flex items-center gap-4 px-4 py-3.5 bg-background-light dark:bg-background-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined" style="font-size: 20px;">swap_horiz</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Savings Transfer</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">To: Vault • Recurring</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100">$50.00</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="flex gap-2 border-t border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark px-4 pb-4 pt-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">home</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<span class="material-symbols-outlined filled" style="font-size: 24px; font-variation-settings: 'FILL' 1;">receipt_long</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Transactions</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">pie_chart</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Budget</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">person</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Profile</p>
+</a>
+</div>
+</div>
+</body></html>

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:money_manager/base_service.dart';
-import 'package:money_manager/route/edit_record_page.dart';
-import 'package:money_manager/route/main_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+
+import 'base_service.dart';
+import 'data/app_state.dart';
+import 'l10n/app_localizations.dart';
+import 'screens/startup_page.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,20 +17,32 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (_) => AppState(),
+      child: Consumer<AppState>(
+        builder: (context, appState, _) {
+          final mode = appState.themeMode;
+          final themeMode = mode == 'light'
+              ? ThemeMode.light
+              : mode == 'dark'
+                  ? ThemeMode.dark
+                  : ThemeMode.system;
+          return MaterialApp(
+            title: 'Money Manager',
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.lightTheme(),
+            darkTheme: AppTheme.darkTheme(),
+            themeMode: themeMode,
+            home: const StartupPage(),
+          );
+        },
       ),
-      routes: {
-        MyMainPage.routeName: (context) =>
-            const MyMainPage(title: 'Flutter Demo Home Page'),
-        EditRecordPage.routeName: (context) => EditRecordPage()
-      },
     );
   }
 }
