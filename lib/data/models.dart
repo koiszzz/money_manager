@@ -12,6 +12,7 @@ class Account {
     required this.openingBalance,
     this.note,
     this.enabled = true,
+    this.sortOrder = 0,
   });
 
   final String id;
@@ -20,6 +21,7 @@ class Account {
   final double openingBalance;
   final String? note;
   final bool enabled;
+  final int sortOrder;
 }
 
 extension AccountMapping on Account {
@@ -30,6 +32,7 @@ extension AccountMapping on Account {
         'opening_balance': openingBalance,
         'note': note,
         'enabled': enabled ? 1 : 0,
+        'sort_order': sortOrder,
       };
 
   static Account fromMap(Map<String, dynamic> map) {
@@ -40,6 +43,7 @@ extension AccountMapping on Account {
       openingBalance: (map['opening_balance'] as num).toDouble(),
       note: map['note'] as String?,
       enabled: (map['enabled'] as num) == 1,
+      sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -52,6 +56,7 @@ class Category {
     required this.icon,
     required this.colorHex,
     this.enabled = true,
+    this.sortOrder = 0,
   });
 
   final String id;
@@ -60,6 +65,7 @@ class Category {
   final int icon;
   final int colorHex;
   final bool enabled;
+  final int sortOrder;
 }
 
 extension CategoryMapping on Category {
@@ -70,6 +76,7 @@ extension CategoryMapping on Category {
         'icon': icon,
         'color_hex': colorHex,
         'enabled': enabled ? 1 : 0,
+        'sort_order': sortOrder,
       };
 
   static Category fromMap(Map<String, dynamic> map) {
@@ -80,6 +87,7 @@ extension CategoryMapping on Category {
       icon: map['icon'] as int,
       colorHex: map['color_hex'] as int,
       enabled: (map['enabled'] as num) == 1,
+      sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
     );
   }
 }

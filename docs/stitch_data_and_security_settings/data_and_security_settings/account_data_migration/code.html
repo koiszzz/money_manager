@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Data Migration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b9dee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for better mobile feel if needed */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101a22; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2b9dee; 
+            border-radius: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col antialiased">
+<!-- Main Container -->
+<div class="relative flex flex-col flex-1 h-full w-full max-w-md mx-auto bg-background-light dark:bg-background-dark overflow-hidden border-x border-slate-200 dark:border-slate-800 shadow-2xl">
+<!-- Header -->
+<div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark sticky top-0 z-10">
+<button class="text-slate-900 dark:text-slate-100 p-2 -ml-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight flex-1 text-center pr-8">Migrate Transactions</h2>
+<button class="text-primary font-medium text-sm">Help</button>
+</div>
+<!-- Content Scroll Area -->
+<div class="flex-1 overflow-y-auto pb-24">
+<!-- Title Section -->
+<div class="px-5 pt-6 pb-4">
+<h1 class="text-slate-900 dark:text-slate-100 text-2xl font-bold leading-tight mb-2">Move account data</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Select the source and destination accounts to transfer your transaction history securely.</p>
+</div>
+<!-- Form Section -->
+<div class="px-5 space-y-6">
+<!-- Source Account -->
+<div class="space-y-2">
+<label class="block text-slate-700 dark:text-slate-300 text-sm font-medium">Source Account</label>
+<div class="relative">
+<select class="w-full appearance-none bg-white dark:bg-[#1c252e] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-base rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+<option disabled="" selected="" value="">Select origin account</option>
+<option value="chase_checking">Chase Checking (...8842)</option>
+<option value="amex_gold">Amex Gold (...1029)</option>
+<option value="cash_wallet">Cash Wallet</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Migration Arrow Indicator -->
+<div class="flex justify-center -my-2 relative z-0">
+<div class="bg-slate-100 dark:bg-[#25303b] rounded-full p-2 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 rotate-90 block">arrow_right_alt</span>
+</div>
+</div>
+<!-- Target Account -->
+<div class="space-y-2 relative z-10">
+<label class="block text-slate-700 dark:text-slate-300 text-sm font-medium">Target Account</label>
+<div class="relative">
+<select class="w-full appearance-none bg-white dark:bg-[#1c252e] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-base rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+<option disabled="" value="">Select destination account</option>
+<option selected="" value="wf_savings">Wells Fargo Savings (...3310)</option>
+<option value="citi_credit">Citi Double Cash (...9921)</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Summary Card -->
+<div class="bg-slate-100 dark:bg-[#1c252e] rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex items-start gap-3 mt-8">
+<div class="bg-primary/20 text-primary rounded-lg p-2 shrink-0">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 font-semibold text-sm">Migration Summary</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1">
+<span class="font-bold text-primary">142 transactions</span> will be moved from Chase Checking to Wells Fargo Savings.
+                        </p>
+</div>
+</div>
+<!-- Warning Banner -->
+<div class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl p-4 flex gap-3 items-start">
+<span class="material-symbols-outlined text-red-600 dark:text-red-400 text-[20px] mt-0.5 shrink-0">warning</span>
+<div>
+<h4 class="text-red-900 dark:text-red-300 text-sm font-bold">Action is irreversible</h4>
+<p class="text-red-700 dark:text-red-400 text-xs mt-1 leading-normal">
+                            Once migrated, transactions cannot be automatically restored to the original account. Please verify your selection.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<div class="px-5 mt-8">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+                    Start Migration
+                </button>
+<p class="text-center text-slate-400 dark:text-slate-500 text-xs mt-4">
+                    Last migration: Oct 24, 2023
+                </p>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1c252e] px-2 pb-5 pt-2">
+<div class="flex justify-around items-end">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 group" href="#">
+<div class="text-slate-400 dark:text-slate-500 group-hover:text-primary transition-colors flex items-center justify-center h-7 w-7 rounded-full">
+<span class="material-symbols-outlined text-[24px]">home</span>
+</div>
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Home</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 group" href="#">
+<div class="text-slate-400 dark:text-slate-500 group-hover:text-primary transition-colors flex items-center justify-center h-7 w-7 rounded-full">
+<span class="material-symbols-outlined text-[24px]">pie_chart</span>
+</div>
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Budget</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 group" href="#">
+<div class="text-slate-400 dark:text-slate-500 group-hover:text-primary transition-colors flex items-center justify-center h-7 w-7 rounded-full">
+<span class="material-symbols-outlined text-[24px]">credit_card</span>
+</div>
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Accounts</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 group" href="#">
+<div class="text-primary bg-primary/10 rounded-full h-8 w-12 flex items-center justify-center mb-0.5">
+<span class="material-symbols-outlined text-[24px] fill-current">settings</span>
+</div>
+<span class="text-xs font-medium text-primary">Settings</span>
+</a>
+</div>
+</div>
+</div>
+</body></html>

@@ -11,6 +11,7 @@ class SampleData {
       type: AccountType.cash,
       openingBalance: 240.0,
       note: '主现金',
+      sortOrder: 0,
     ),
     Account(
       id: 'acc_piggy',
@@ -18,6 +19,7 @@ class SampleData {
       type: AccountType.cash,
       openingBalance: 180.0,
       note: '家庭备用',
+      sortOrder: 1,
     ),
     Account(
       id: 'acc_checking',
@@ -25,6 +27,7 @@ class SampleData {
       type: AccountType.bank,
       openingBalance: 12500.0,
       note: '**** 4829',
+      sortOrder: 0,
     ),
     Account(
       id: 'acc_saving',
@@ -32,6 +35,7 @@ class SampleData {
       type: AccountType.bank,
       openingBalance: 126000.0,
       note: '4.5% APY',
+      sortOrder: 1,
     ),
     Account(
       id: 'acc_amex',
@@ -39,6 +43,7 @@ class SampleData {
       type: AccountType.creditCard,
       openingBalance: -2150.0,
       note: '5天后到期',
+      sortOrder: 0,
     ),
   ];
 
@@ -49,6 +54,7 @@ class SampleData {
       name: '餐饮',
       icon: Symbols.restaurant.codePoint,
       colorHex: 0xFFF59E0B,
+      sortOrder: 0,
     ),
     Category(
       id: 'cat_shop',
@@ -56,6 +62,7 @@ class SampleData {
       name: '购物',
       icon: Symbols.shopping_cart.codePoint,
       colorHex: 0xFFF97316,
+      sortOrder: 1,
     ),
     Category(
       id: 'cat_transport',
@@ -63,6 +70,7 @@ class SampleData {
       name: '交通',
       icon: Symbols.local_taxi.codePoint,
       colorHex: 0xFF3B82F6,
+      sortOrder: 2,
     ),
     Category(
       id: 'cat_ent',
@@ -70,6 +78,7 @@ class SampleData {
       name: '娱乐',
       icon: Symbols.movie.codePoint,
       colorHex: 0xFFA855F7,
+      sortOrder: 3,
     ),
     Category(
       id: 'cat_salary',
@@ -77,6 +86,7 @@ class SampleData {
       name: '工资',
       icon: Symbols.account_balance_wallet.codePoint,
       colorHex: 0xFF10B981,
+      sortOrder: 0,
     ),
     Category(
       id: 'cat_other_income',
@@ -84,6 +94,7 @@ class SampleData {
       name: '其它收入',
       icon: Symbols.savings.codePoint,
       colorHex: 0xFF06B6D4,
+      sortOrder: 1,
     ),
   ];
 

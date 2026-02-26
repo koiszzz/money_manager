@@ -29,6 +29,12 @@ class MyApp extends StatelessWidget {
               : mode == 'dark'
                   ? ThemeMode.dark
                   : ThemeMode.system;
+          Locale? locale;
+          if (appState.appLanguage == 'zh_CN') {
+            locale = const Locale('zh', 'CN');
+          } else if (appState.appLanguage == 'en_US') {
+            locale = const Locale('en', 'US');
+          }
           return MaterialApp(
             title: 'Money Manager',
             localizationsDelegates: const [
@@ -39,6 +45,14 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme(),
             darkTheme: AppTheme.darkTheme(),
             themeMode: themeMode,
+            locale: locale,
+            builder: (context, child) {
+              final media = MediaQuery.of(context);
+              return MediaQuery(
+                data: media.copyWith(textScaleFactor: appState.fontScale),
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
             home: const StartupPage(),
           );
         },

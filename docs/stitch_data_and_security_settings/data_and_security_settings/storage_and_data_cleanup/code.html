@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Storage and Data Cleanup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b9dee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col items-center justify-center p-4 sm:p-0">
+<div class="relative w-full max-w-md h-full min-h-[800px] flex flex-col bg-background-light dark:bg-background-dark overflow-hidden shadow-2xl rounded-xl sm:my-8 border border-slate-200 dark:border-slate-800">
+<!-- Header -->
+<div class="flex items-center px-4 py-4 justify-between bg-background-light dark:bg-background-dark sticky top-0 z-10">
+<div class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">Storage &amp; Data</h2>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto">
+<!-- Hero / Status Area -->
+<div class="flex flex-col items-center justify-center py-10 px-6">
+<div class="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center mb-6 relative">
+<!-- Circular Progress Indicator simulation -->
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<path class="text-slate-300 dark:text-slate-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="2"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="10, 100" stroke-width="2"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-primary">database</span>
+</div>
+</div>
+<h3 class="text-slate-900 dark:text-white text-xl font-bold mb-1">17 MB Used</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm text-center">Total space used by temporary files and cache.</p>
+</div>
+<!-- List Items -->
+<div class="px-4">
+<h4 class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3 px-2">Details</h4>
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="flex justify-between items-center p-4 border-b border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined text-[20px]">cached</span>
+</div>
+<div class="flex flex-col">
+<p class="text-slate-900 dark:text-white text-sm font-medium">Cache</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Images and api responses</p>
+</div>
+</div>
+<p class="text-slate-900 dark:text-white text-sm font-bold">12 MB</p>
+</div>
+<div class="flex justify-between items-center p-4">
+<div class="flex items-center gap-3">
+<div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined text-[20px]">description</span>
+</div>
+<div class="flex flex-col">
+<p class="text-slate-900 dark:text-white text-sm font-medium">Temporary Files</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Logs and session data</p>
+</div>
+</div>
+<p class="text-slate-900 dark:text-white text-sm font-bold">5 MB</p>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="p-4 mt-6 flex flex-col gap-3">
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors">
+<span class="mr-2 material-symbols-outlined text-[18px]">cleaning_services</span>
+<span class="truncate">Clear Cache</span>
+</button>
+<button class="group flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold leading-normal tracking-[0.015em] transition-colors mt-2">
+<span class="mr-2 material-symbols-outlined text-[18px]">delete_forever</span>
+<span class="truncate">Clear All Data</span>
+</button>
+<p class="text-center text-xs text-slate-400 dark:text-slate-500 mt-1">Clearing all data will sign you out.</p>
+</div>
+</div>
+<!-- PIN Confirmation Modal Overlay -->
+<!-- In a real app this would be conditionally rendered. Here it's displayed as part of the 'Variant 7' request showing the PIN prompt -->
+<div class="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+<div class="bg-white dark:bg-[#15202b] w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-in slide-in-from-bottom-10 fade-in duration-300">
+<div class="flex flex-col items-center">
+<div class="size-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mb-4 text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined text-[28px]">lock</span>
+</div>
+<h3 class="text-slate-900 dark:text-white text-lg font-bold mb-2">Confirm Identity</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm text-center mb-6">Enter your PIN to confirm deletion of all app data. This action cannot be undone.</p>
+<!-- PIN Input -->
+<div class="flex justify-center gap-2 mb-8 w-full">
+<input class="flex h-12 w-10 text-center rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white text-xl font-bold" maxlength="1" readonly="" type="password" value="1"/>
+<input class="flex h-12 w-10 text-center rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white text-xl font-bold" maxlength="1" readonly="" type="password" value="2"/>
+<input autofocus="" class="flex h-12 w-10 text-center rounded-lg bg-slate-50 dark:bg-slate-800 border border-primary dark:border-primary ring-2 ring-primary/20 text-slate-900 dark:text-white text-xl font-bold animate-pulse" maxlength="1" type="number"/>
+<input class="flex h-12 w-10 text-center rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white text-xl font-bold" maxlength="1" type="number"/>
+</div>
+<div class="flex gap-3 w-full">
+<button class="flex-1 h-10 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            Cancel
+                        </button>
+<button class="flex-1 h-10 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-sm shadow-lg shadow-red-900/20 transition-colors">
+                            Confirm
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

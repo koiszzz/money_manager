@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Management Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b9dee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for better look in dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1c2a35; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2b9dee; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e7bbd; 
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col items-center justify-start overflow-x-hidden">
+<div class="w-full max-w-md bg-background-light dark:bg-background-dark min-h-screen relative flex flex-col pb-20">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-10 bg-background-light dark:bg-background-dark/95 backdrop-blur-sm p-4 pb-2 flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
+<div class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Manage Accounts</h2>
+<div class="flex w-10 items-center justify-end">
+<p class="text-primary text-base font-bold leading-normal tracking-[0.015em] shrink-0 cursor-pointer hover:opacity-80">Edit</p>
+</div>
+</div>
+<!-- Total Assets Summary Card -->
+<div class="p-4">
+<div class="relative overflow-hidden flex items-center justify-between gap-4 rounded-xl bg-[#1c2a35] dark:bg-[#1c2a35] p-6 shadow-lg border border-gray-700/50">
+<!-- Abstract gradient background accent -->
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
+<div class="flex flex-col gap-2 flex-[2_2_0px] relative z-10">
+<p class="text-slate-400 dark:text-slate-400 text-sm font-medium tracking-wide uppercase">Total Net Worth</p>
+<p class="text-slate-900 dark:text-white text-3xl font-bold leading-tight tracking-tight">$148,592.45</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-emerald-500 text-sm">trending_up</span>
+<p class="text-emerald-500 text-xs font-bold">+2.4% this month</p>
+</div>
+</div>
+<div class="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-3xl">account_balance_wallet</span>
+</div>
+</div>
+</div>
+<!-- Bank Accounts Section -->
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-2">Bank Accounts</h3>
+<div class="flex flex-col gap-1">
+<!-- Chase Checking Item -->
+<div class="group flex items-center gap-3 bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-[#152028] px-4 min-h-[72px] py-3 justify-between border-b border-gray-200 dark:border-gray-800/50">
+<div class="flex items-center gap-3 w-full">
+<div class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="text-white flex items-center justify-center rounded-xl bg-[#283239] shrink-0 size-12 shadow-sm">
+<span class="material-symbols-outlined text-primary">account_balance</span>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Chase Checking</p>
+<p class="text-slate-500 dark:text-[#9dadb9] text-sm font-normal leading-normal line-clamp-2">**** 4521 • $5,230.45</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[28px] w-[48px] cursor-pointer items-center rounded-full border-none bg-slate-300 dark:bg-[#283239] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all duration-200">
+<div class="h-[24px] w-[24px] rounded-full bg-white shadow-sm transition-all duration-200"></div>
+<input checked="" class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Wells Fargo Savings Item -->
+<div class="group flex items-center gap-3 bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-[#152028] px-4 min-h-[72px] py-3 justify-between border-b border-gray-200 dark:border-gray-800/50">
+<div class="flex items-center gap-3 w-full">
+<div class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="text-white flex items-center justify-center rounded-xl bg-[#283239] shrink-0 size-12 shadow-sm">
+<span class="material-symbols-outlined text-rose-400">savings</span>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Wells Fargo Savings</p>
+<p class="text-slate-500 dark:text-[#9dadb9] text-sm font-normal leading-normal line-clamp-2">**** 8829 • $24,000.00</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[28px] w-[48px] cursor-pointer items-center rounded-full border-none bg-slate-300 dark:bg-[#283239] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all duration-200">
+<div class="h-[24px] w-[24px] rounded-full bg-white shadow-sm transition-all duration-200"></div>
+<input checked="" class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Inactive Account Item -->
+<div class="group flex items-center gap-3 bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-[#152028] px-4 min-h-[72px] py-3 justify-between border-b border-gray-200 dark:border-gray-800/50 opacity-60">
+<div class="flex items-center gap-3 w-full">
+<div class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="text-white flex items-center justify-center rounded-xl bg-[#283239] shrink-0 size-12 shadow-sm">
+<span class="material-symbols-outlined text-amber-400">account_balance</span>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Citi Checking (Old)</p>
+<p class="text-slate-500 dark:text-[#9dadb9] text-sm font-normal leading-normal line-clamp-2">**** 1021 • $12.42</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[28px] w-[48px] cursor-pointer items-center rounded-full border-none bg-slate-300 dark:bg-[#283239] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all duration-200">
+<div class="h-[24px] w-[24px] rounded-full bg-white shadow-sm transition-all duration-200"></div>
+<input class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Credit Cards Section -->
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-6">Credit Cards</h3>
+<div class="flex flex-col gap-1">
+<!-- Amex Gold Item -->
+<div class="group flex items-center gap-3 bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-[#152028] px-4 min-h-[72px] py-3 justify-between border-b border-gray-200 dark:border-gray-800/50">
+<div class="flex items-center gap-3 w-full">
+<div class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="text-white flex items-center justify-center rounded-xl bg-[#283239] shrink-0 size-12 shadow-sm">
+<span class="material-symbols-outlined text-purple-400">credit_card</span>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Amex Gold</p>
+<p class="text-slate-500 dark:text-[#9dadb9] text-sm font-normal leading-normal line-clamp-2">**** 3004 • $1,240.00 Due</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[28px] w-[48px] cursor-pointer items-center rounded-full border-none bg-slate-300 dark:bg-[#283239] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all duration-200">
+<div class="h-[24px] w-[24px] rounded-full bg-white shadow-sm transition-all duration-200"></div>
+<input checked="" class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Apple Card Item -->
+<div class="group flex items-center gap-3 bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-[#152028] px-4 min-h-[72px] py-3 justify-between border-b border-gray-200 dark:border-gray-800/50">
+<div class="flex items-center gap-3 w-full">
+<div class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="text-white flex items-center justify-center rounded-xl bg-[#283239] shrink-0 size-12 shadow-sm">
+<span class="material-symbols-outlined text-white">credit_card</span>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Apple Card</p>
+<p class="text-slate-500 dark:text-[#9dadb9] text-sm font-normal leading-normal line-clamp-2">**** 1122 • $450.25 Due</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[28px] w-[48px] cursor-pointer items-center rounded-full border-none bg-slate-300 dark:bg-[#283239] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all duration-200">
+<div class="h-[24px] w-[24px] rounded-full bg-white shadow-sm transition-all duration-200"></div>
+<input checked="" class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Cash Section -->
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-6">Cash</h3>
+<div class="flex flex-col gap-1">
+<!-- Wallet Cash Item -->
+<div class="group flex items-center gap-3 bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-[#152028] px-4 min-h-[72px] py-3 justify-between border-b border-gray-200 dark:border-gray-800/50">
+<div class="flex items-center gap-3 w-full">
+<div class="text-slate-400 dark:text-slate-500 cursor-grab active:cursor-grabbing hover:text-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="text-white flex items-center justify-center rounded-xl bg-[#283239] shrink-0 size-12 shadow-sm">
+<span class="material-symbols-outlined text-emerald-400">payments</span>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Wallet Cash</p>
+<p class="text-slate-500 dark:text-[#9dadb9] text-sm font-normal leading-normal line-clamp-2">Manual Entry • $120.00</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[28px] w-[48px] cursor-pointer items-center rounded-full border-none bg-slate-300 dark:bg-[#283239] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all duration-200">
+<div class="h-[24px] w-[24px] rounded-full bg-white shadow-sm transition-all duration-200"></div>
+<input checked="" class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Button Area -->
+<div class="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto p-4 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light dark:via-background-dark to-transparent z-20">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">add_circle</span>
+                Add New Account
+            </button>
+</div>
+<!-- Bottom spacing for scrolling past FAB -->
+<div class="h-24"></div>
+</div>
+</body></html>

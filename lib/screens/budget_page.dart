@@ -82,12 +82,17 @@ class BudgetPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  Formatters.money(used, locale: locale),
+                  Formatters.money(
+                    used,
+                    locale: locale,
+                    currencyCode: appState.currencyCode,
+                    decimalDigits: appState.decimalPlaces,
+                  ),
                   style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${strings.budgetLimit} ${Formatters.money(budget.totalAmount, locale: locale)}',
+                  '${strings.budgetLimit} ${Formatters.money(budget.totalAmount, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)}',
                   style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
                 const SizedBox(height: 10),
@@ -107,7 +112,7 @@ class BudgetPage extends StatelessWidget {
                     Text('${(ratio * 100).toStringAsFixed(0)}% ${strings.used}',
                         style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                     Text(
-                      '${Formatters.money(budget.totalAmount - used, locale: locale)} ${strings.left}',
+                      '${Formatters.money(budget.totalAmount - used, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)} ${strings.left}',
                       style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                     ),
                   ],
@@ -181,6 +186,7 @@ class _CategoryBudgetTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.read<AppState>();
     final locale = Localizations.localeOf(context).toString();
     final remaining = limit - spent;
     final over = remaining < 0;
@@ -206,7 +212,7 @@ class _CategoryBudgetTile extends StatelessWidget {
                 child: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
               Text(
-                '${Formatters.money(spent, locale: locale)} / ${Formatters.money(limit, locale: locale)}',
+                '${Formatters.money(spent, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)} / ${Formatters.money(limit, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)}',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ],
@@ -224,8 +230,8 @@ class _CategoryBudgetTile extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             over
-                ? '${Formatters.money(remaining, locale: locale)} $overLabel'
-                : '${Formatters.money(remaining, locale: locale)} $leftLabel',
+                ? '${Formatters.money(remaining, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)} $overLabel'
+                : '${Formatters.money(remaining, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)} $leftLabel',
             style: TextStyle(
               color: over ? Colors.redAccent : AppTheme.textMuted,
               fontSize: 12,

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Display &amp; Localization</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b9dee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2b3b4b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4b5b;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased min-h-screen flex flex-col items-center justify-center sm:p-4">
+<!-- Mobile Container -->
+<div class="w-full max-w-md h-full min-h-screen sm:min-h-[800px] sm:h-auto sm:rounded-xl overflow-hidden bg-background-light dark:bg-background-dark shadow-2xl relative flex flex-col border border-slate-200 dark:border-slate-800">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-10 flex items-center bg-background-light dark:bg-background-dark p-4 border-b border-slate-200 dark:border-slate-800/50">
+<button class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">Display &amp; Localization</h2>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto">
+<!-- Live Preview Section -->
+<div class="p-6 flex flex-col items-center justify-center space-y-2">
+<div class="w-full bg-slate-200 dark:bg-[#1a2630] rounded-xl p-8 flex flex-col items-center justify-center border border-slate-300 dark:border-slate-700/50 shadow-inner">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-2 uppercase tracking-wide">Live Preview</p>
+<div class="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">$1,234.56</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="px-2 py-1 rounded bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-semibold">-$42.00</span>
+<span class="px-2 py-1 rounded bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-semibold">+$128.50</span>
+</div>
+</div>
+<p class="text-slate-500 dark:text-slate-500 text-xs text-center px-4">
+                    This is how currency values will appear throughout your dashboard and reports.
+                </p>
+</div>
+<!-- Appearance Section -->
+<div class="px-4 pb-2 pt-2">
+<h3 class="text-slate-900 dark:text-white text-base font-bold leading-tight tracking-[-0.015em] mb-4">Appearance</h3>
+<div class="grid grid-cols-3 gap-3">
+<label class="group cursor-pointer relative">
+<input class="peer invisible absolute" name="theme_mode" type="radio"/>
+<div class="flex flex-col items-center justify-center rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#1a2630] p-4 text-center peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary peer-checked:bg-primary/5 transition-all h-28">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400 mb-2 group-hover:scale-110 transition-transform peer-checked:text-primary">settings_brightness</span>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300 peer-checked:text-primary">System</span>
+</div>
+</label>
+<label class="group cursor-pointer relative">
+<input class="peer invisible absolute" name="theme_mode" type="radio"/>
+<div class="flex flex-col items-center justify-center rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#1a2630] p-4 text-center peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary peer-checked:bg-primary/5 transition-all h-28">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400 mb-2 group-hover:scale-110 transition-transform peer-checked:text-primary">light_mode</span>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300 peer-checked:text-primary">Light</span>
+</div>
+</label>
+<label class="group cursor-pointer relative">
+<input checked="" class="peer invisible absolute" name="theme_mode" type="radio"/>
+<div class="flex flex-col items-center justify-center rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#1a2630] p-4 text-center peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary peer-checked:bg-primary/10 transition-all h-28 relative overflow-hidden">
+<div class="absolute top-2 right-2 text-primary opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm font-bold filled">check_circle</span>
+</div>
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400 mb-2 group-hover:scale-110 transition-transform peer-checked:text-primary fill-current">dark_mode</span>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300 peer-checked:text-primary">Dark</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Formatting Section -->
+<div class="px-4 pb-6 pt-6">
+<h3 class="text-slate-900 dark:text-white text-base font-bold leading-tight tracking-[-0.015em] mb-3">Formatting</h3>
+<div class="flex flex-col overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161f28]">
+<!-- List Item: Currency -->
+<button class="flex items-center gap-4 px-4 py-4 justify-between w-full hover:bg-slate-100 dark:hover:bg-[#1c2834] transition-colors border-b border-slate-200 dark:border-slate-800 group">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-10 rounded-full bg-slate-200 dark:bg-[#1a2630] text-slate-500 dark:text-slate-400 group-hover:text-primary group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">attach_money</span>
+</div>
+<div class="flex flex-col items-start">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Currency</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">USD ($)</p>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-600">chevron_right</span>
+</div>
+</button>
+<!-- List Item: Decimal Places -->
+<button class="flex items-center gap-4 px-4 py-4 justify-between w-full hover:bg-slate-100 dark:hover:bg-[#1c2834] transition-colors border-b border-slate-200 dark:border-slate-800 group">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-10 rounded-full bg-slate-200 dark:bg-[#1a2630] text-slate-500 dark:text-slate-400 group-hover:text-primary group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">decimal_increase</span>
+</div>
+<div class="flex flex-col items-start">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Decimal Places</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">2 Digits (.00)</p>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-600">chevron_right</span>
+</div>
+</button>
+<!-- List Item: Week Starts On -->
+<button class="flex items-center gap-4 px-4 py-4 justify-between w-full hover:bg-slate-100 dark:hover:bg-[#1c2834] transition-colors group">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-10 rounded-full bg-slate-200 dark:bg-[#1a2630] text-slate-500 dark:text-slate-400 group-hover:text-primary group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">calendar_today</span>
+</div>
+<div class="flex flex-col items-start">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Week Starts On</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">Monday</p>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-600">chevron_right</span>
+</div>
+</button>
+</div>
+</div>
+<!-- Regional & Language (Extra Context) -->
+<div class="px-4 pb-8">
+<h3 class="text-slate-900 dark:text-white text-base font-bold leading-tight tracking-[-0.015em] mb-3">Language</h3>
+<div class="flex flex-col overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#161f28]">
+<button class="flex items-center gap-4 px-4 py-4 justify-between w-full hover:bg-slate-100 dark:hover:bg-[#1c2834] transition-colors group">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-10 rounded-full bg-slate-200 dark:bg-[#1a2630] text-slate-500 dark:text-slate-400 group-hover:text-primary group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">translate</span>
+</div>
+<div class="flex flex-col items-start">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">App Language</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">English (US)</p>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-600">chevron_right</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

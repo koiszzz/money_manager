@@ -101,7 +101,12 @@ class ReportsPage extends StatelessWidget {
                               style: TextStyle(
                                   color: AppTheme.textMuted, fontSize: 12)),
                           Text(
-                            Formatters.money(expense, locale: locale),
+                            Formatters.money(
+                              expense,
+                              locale: locale,
+                              currencyCode: appState.currencyCode,
+                              decimalDigits: appState.decimalPlaces,
+                            ),
                             style: const TextStyle(
                                 fontWeight: FontWeight.w700, fontSize: 18),
                           ),
@@ -183,8 +188,12 @@ class ReportsPage extends StatelessWidget {
                         leading: CircleAvatar(
                           backgroundColor: Color(cat.colorHex),
                           child: Icon(
-                            IconData(cat.icon,
-                                fontFamily: 'MaterialSymbolsOutlined'),
+                            IconData(
+                              cat.icon == 0
+                                  ? Symbols.category.codePoint
+                                  : cat.icon,
+                              fontFamily: 'MaterialSymbolsOutlined',
+                            ),
                             size: 18,
                             color: Colors.white,
                           ),
@@ -197,7 +206,12 @@ class ReportsPage extends StatelessWidget {
                           color: AppTheme.primary,
                         ),
                         trailing: Text(
-                          Formatters.money(350, locale: locale),
+                          Formatters.money(
+                            350,
+                            locale: locale,
+                            currencyCode: appState.currencyCode,
+                            decimalDigits: appState.decimalPlaces,
+                          ),
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),

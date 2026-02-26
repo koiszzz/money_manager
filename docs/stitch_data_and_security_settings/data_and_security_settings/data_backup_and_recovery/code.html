@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Data Backup and Recovery</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b9dee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased min-h-screen">
+<div class="relative flex h-full w-full flex-col max-w-md mx-auto overflow-hidden bg-background-light dark:bg-background-dark shadow-xl min-h-screen">
+<!-- Header -->
+<div class="flex items-center p-4 sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">Backup &amp; Recovery</h2>
+</div>
+<!-- Main Content -->
+<div class="flex-1 overflow-y-auto pb-8">
+<!-- Status Card -->
+<div class="px-4 py-6">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Backup Status</h2>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between bg-white dark:bg-[#19232c] p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20 shrink-0 size-12 text-primary">
+<span class="material-symbols-outlined text-[28px]">cloud_done</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-normal">Last Backup</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal">2 hours ago</p>
+</div>
+</div>
+<div class="shrink-0 text-emerald-500 dark:text-emerald-400">
+<span class="material-symbols-outlined text-[24px]">check_circle</span>
+</div>
+</div>
+<div class="flex items-center justify-between bg-white dark:bg-[#19232c] p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm opacity-80">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 size-12 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[28px]">schedule</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-normal">Next Scheduled</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium leading-normal">Tomorrow, 3:00 AM</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="px-4 py-2">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Quick Actions</h2>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-primary hover:bg-primary/90 transition-colors text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-3xl">upload</span>
+<span class="text-sm font-bold">Export Backup</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-white dark:bg-[#19232c] border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-900 dark:text-slate-100 shadow-sm">
+<span class="material-symbols-outlined text-3xl text-primary">download</span>
+<span class="text-sm font-bold">Import from File</span>
+</button>
+</div>
+<div class="mt-4 p-4 rounded-xl bg-slate-100 dark:bg-[#151f28] border border-slate-200 dark:border-slate-800">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400 shrink-0 mt-0.5">info</span>
+<div class="text-sm text-slate-600 dark:text-slate-400">
+<p class="font-medium text-slate-900 dark:text-slate-200 mb-1">File Format Requirements</p>
+<p>Import files must be strictly in <span class="font-mono text-xs bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-slate-800 dark:text-slate-300">.json</span> or <span class="font-mono text-xs bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-slate-800 dark:text-slate-300">.csv</span> format. Encrypted backups require a password key upon restoration.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Local Backups List -->
+<div class="px-4 py-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-[-0.015em]">Local Backups</h2>
+<button class="text-primary text-sm font-semibold hover:text-primary/80">View All</button>
+</div>
+<div class="flex flex-col bg-white dark:bg-[#19232c] rounded-xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 size-10 text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">folder_zip</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold">backup_oct_24.json</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Oct 24, 2023 • 2.4 MB</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">more_vert</span>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 size-10 text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">folder_zip</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold">backup_oct_10.json</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Oct 10, 2023 • 2.3 MB</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">more_vert</span>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 size-10 text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">folder_zip</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold">auto_backup_sep_28.csv</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Sep 28, 2023 • 1.8 MB</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">more_vert</span>
+</div>
+</div>
+</div>
+<!-- Footer Note -->
+<div class="px-6 text-center pb-6">
+<p class="text-xs text-slate-400 dark:text-slate-500">
+                    Backups are stored locally on your device. Ensure you export critical data to cloud storage regularly.
+                </p>
+</div>
+</div>
+</div>
+</body></html>

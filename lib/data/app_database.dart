@@ -21,7 +21,7 @@ class AppDatabase {
     final path = join(dbPath, 'money_manager.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE accounts (
@@ -30,7 +30,8 @@ class AppDatabase {
             type TEXT NOT NULL,
             opening_balance REAL NOT NULL,
             note TEXT,
-            enabled INTEGER NOT NULL
+            enabled INTEGER NOT NULL,
+            sort_order INTEGER NOT NULL
           );
         ''');
         await db.execute('''
@@ -40,7 +41,8 @@ class AppDatabase {
             name TEXT NOT NULL,
             icon INTEGER NOT NULL,
             color_hex INTEGER NOT NULL,
-            enabled INTEGER NOT NULL
+            enabled INTEGER NOT NULL,
+            sort_order INTEGER NOT NULL
           );
         ''');
         await db.execute('''
@@ -82,6 +84,16 @@ class AppDatabase {
             value TEXT NOT NULL
           );
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE accounts ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0;',
+          );
+          await db.execute(
+            'ALTER TABLE categories ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0;',
+          );
+        }
       },
     );
   }

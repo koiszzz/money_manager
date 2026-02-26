@@ -70,6 +70,8 @@ class DashboardPage extends StatelessWidget {
           _BalanceCard(
             amount: balance,
             locale: locale,
+            currencyCode: appState.currencyCode,
+            decimalDigits: appState.decimalPlaces,
             title: strings.totalBalance,
             changeLabel: strings.lastMonthChange,
           ),
@@ -79,7 +81,12 @@ class DashboardPage extends StatelessWidget {
               Expanded(
                 child: _StatCard(
                   title: strings.monthIncome,
-                  value: Formatters.money(income, locale: locale),
+                  value: Formatters.money(
+                    income,
+                    locale: locale,
+                    currencyCode: appState.currencyCode,
+                    decimalDigits: appState.decimalPlaces,
+                  ),
                   icon: Symbols.south_west,
                   iconColor: Colors.greenAccent.shade200,
                 ),
@@ -88,7 +95,12 @@ class DashboardPage extends StatelessWidget {
               Expanded(
                 child: _StatCard(
                   title: strings.monthExpense,
-                  value: Formatters.money(expense, locale: locale),
+                  value: Formatters.money(
+                    expense,
+                    locale: locale,
+                    currencyCode: appState.currencyCode,
+                    decimalDigits: appState.decimalPlaces,
+                  ),
                   icon: Symbols.north_east,
                   iconColor: Colors.redAccent.shade200,
                 ),
@@ -101,6 +113,8 @@ class DashboardPage extends StatelessWidget {
             used: budgetUsed,
             ratio: budgetRatio,
             locale: locale,
+            currencyCode: appState.currencyCode,
+            decimalDigits: appState.decimalPlaces,
             title: strings.monthlyBudget,
             usedLabel: strings.spent,
             leftLabel: strings.left,
@@ -138,7 +152,12 @@ class DashboardPage extends StatelessWidget {
             )
           else
             ...recentRecords.map(
-              (record) => _RecentItem(record: record, locale: locale),
+              (record) => _RecentItem(
+                record: record,
+                locale: locale,
+                currencyCode: appState.currencyCode,
+                decimalDigits: appState.decimalPlaces,
+              ),
             ),
         ],
       ),
@@ -197,12 +216,16 @@ class _BalanceCard extends StatelessWidget {
   const _BalanceCard({
     required this.amount,
     required this.locale,
+    required this.currencyCode,
+    required this.decimalDigits,
     required this.title,
     required this.changeLabel,
   });
 
   final double amount;
   final String locale;
+  final String currencyCode;
+  final int decimalDigits;
   final String title;
   final String changeLabel;
 
@@ -229,7 +252,12 @@ class _BalanceCard extends StatelessWidget {
           Text(title, style: const TextStyle(color: Colors.white70)),
           const SizedBox(height: 6),
           Text(
-            Formatters.money(amount, locale: locale),
+            Formatters.money(
+              amount,
+              locale: locale,
+              currencyCode: currencyCode,
+              decimalDigits: decimalDigits,
+            ),
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -295,6 +323,8 @@ class _BudgetCard extends StatelessWidget {
     required this.used,
     required this.ratio,
     required this.locale,
+    required this.currencyCode,
+    required this.decimalDigits,
     required this.title,
     required this.usedLabel,
     required this.leftLabel,
@@ -306,6 +336,8 @@ class _BudgetCard extends StatelessWidget {
   final double used;
   final double ratio;
   final String locale;
+  final String currencyCode;
+  final int decimalDigits;
   final String title;
   final String usedLabel;
   final String leftLabel;
@@ -336,7 +368,8 @@ class _BudgetCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            Text('${Formatters.money(used, locale: locale)} $usedLabel',
+            Text(
+                '${Formatters.money(used, locale: locale, currencyCode: currencyCode, decimalDigits: decimalDigits)} $usedLabel',
                 style:
                     const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
             const SizedBox(height: 10),
@@ -354,7 +387,7 @@ class _BudgetCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                    '${Formatters.money(total - used, locale: locale)} $leftLabel',
+                    '${Formatters.money(total - used, locale: locale, currencyCode: currencyCode, decimalDigits: decimalDigits)} $leftLabel',
                     style: const TextStyle(
                         color: AppTheme.textMuted, fontSize: 12)),
                 Text('${(ratio * 100).toStringAsFixed(0)}% $percentLabel',
@@ -370,10 +403,17 @@ class _BudgetCard extends StatelessWidget {
 }
 
 class _RecentItem extends StatelessWidget {
-  const _RecentItem({required this.record, required this.locale});
+  const _RecentItem({
+    required this.record,
+    required this.locale,
+    required this.currencyCode,
+    required this.decimalDigits,
+  });
 
   final TransactionRecord record;
   final String locale;
+  final String currencyCode;
+  final int decimalDigits;
 
   @override
   Widget build(BuildContext context) {
@@ -399,7 +439,9 @@ class _RecentItem extends StatelessWidget {
             backgroundColor: Color(category?.colorHex ?? 0xFF334155),
             child: Icon(
               IconData(
-                category?.icon ?? Symbols.swap_horiz.codePoint,
+                (category?.icon ?? 0) == 0
+                    ? Symbols.swap_horiz.codePoint
+                    : category!.icon,
                 fontFamily: 'MaterialSymbolsOutlined',
               ),
               size: 18,
@@ -429,6 +471,8 @@ class _RecentItem extends StatelessWidget {
                   : record.amount,
               showSign: record.type != TransactionType.transfer,
               locale: locale,
+              currencyCode: currencyCode,
+              decimalDigits: decimalDigits,
             ),
             style: TextStyle(fontWeight: FontWeight.w600, color: color),
           ),

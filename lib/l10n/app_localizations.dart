@@ -147,6 +147,147 @@ class AppLocalizations {
       'theme_light': 'Light',
       'theme_dark': 'Dark',
       'currency_label': 'Currency',
+      'help': 'Help',
+      'date': 'Date',
+      'display_localization': 'Display & Localization',
+      'accounts_bank_section': 'Bank Accounts',
+      'accounts_credit_section': 'Credit Cards',
+      'accounts_cash_section': 'Cash',
+      'add_new_account': 'Add New Account',
+      'edit_account': 'Edit Account',
+      'account_name': 'Account Name',
+      'account_name_hint': 'e.g. Main Checking',
+      'account_note': 'Account Note',
+      'account_note_hint': 'e.g. **** 4521',
+      'opening_balance': 'Opening balance',
+      'account_type': 'Account type',
+      'account_type_bank': 'Bank',
+      'account_type_credit': 'Credit',
+      'account_type_cash': 'Cash',
+      'account_note_empty': 'No note',
+      'empty_accounts': 'No accounts yet',
+      'account_migration': 'Account Migration',
+      'account_migration_desc': 'Move historical bills to another account',
+      'account_delete_blocked_title': 'Cannot delete',
+      'account_delete_blocked_body': 'This account has transactions. Migrate or disable it first.',
+      'migration_title': 'Move account data',
+      'migration_subtitle': 'Select source and destination accounts to transfer history.',
+      'migration_source': 'Source Account',
+      'migration_target': 'Target Account',
+      'migration_summary': 'Migration Summary',
+      'migration_warning': 'Once migrated, transactions cannot be automatically restored to the original account.',
+      'migration_help_title': 'Migration Help',
+      'migration_help_body': 'Choose a source and target account. Review counts before confirming.',
+      'migration_confirm_body': 'Migration is irreversible. Continue?',
+      'migration_done': 'Migration complete',
+      'start_migration': 'Start Migration',
+      'last_migration': 'Last migration',
+      'never': 'Never',
+      'search_categories_tags': 'Search categories & tags',
+      'frequent': 'Frequent',
+      'no_data': 'No data',
+      'all_categories': 'All Categories',
+      'swipe_hint': 'Swipe left on a category to merge or disable',
+      'records_label': 'records',
+      'merge_category': 'Merge category',
+      'disable_category': 'Disable category',
+      'edit_category': 'Edit category',
+      'no_merge_target': 'No merge target available',
+      'add_tag': 'Add tag',
+      'tag_name': 'Tag name',
+      'category_name': 'Category name',
+      'popular_tags': 'Popular Tags',
+      'new_tag': 'New Tag',
+      'all': 'All',
+      'active': 'Active',
+      'paused': 'Paused',
+      'pending': 'Pending',
+      'pending_confirm': 'Pending Confirmation',
+      'no_recurring': 'No recurring tasks yet',
+      'add_recurring': 'Add recurring task',
+      'recurring_placeholder': 'Recurring task creation is available in the next step.',
+      'recurring_task': 'Recurring task',
+      'alerts_reminders': 'Alerts & Reminders',
+      'daily_reminders': 'Daily Reminders',
+      'daily_reminders_desc': 'Summary of spending',
+      'schedule': 'Schedule',
+      'system_permissions': 'System Permissions',
+      'status_enabled': 'Status: Enabled',
+      'status_disabled': 'Status: Disabled',
+      'dnd_title': 'Do Not Disturb',
+      'dnd_subtitle': 'Mute notifications during sleep',
+      'from': 'From',
+      'to': 'To',
+      'appearance_label': 'Appearance',
+      'formatting_label': 'Formatting',
+      'live_preview': 'LIVE PREVIEW',
+      'decimal_places_label': 'Decimal Places',
+      'week_start_label': 'Week Starts On',
+      'week_start_monday': 'Monday',
+      'week_start_sunday': 'Sunday',
+      'font_size_label': 'Font Size',
+      'font_scale_small': 'Small',
+      'font_scale_default': 'Default',
+      'font_scale_large': 'Large',
+      'language_label': 'Language',
+      'app_language_label': 'App Language',
+      'backup_status': 'Backup Status',
+      'last_backup': 'Last Backup',
+      'next_scheduled': 'Next Scheduled',
+      'backup_next_time': 'Tomorrow, 3:00 AM',
+      'quick_actions': 'Quick Actions',
+      'backup_format_info': 'Import files must be .json or .csv. Encrypted backups require a password.',
+      'local_backups': 'Local Backups',
+      'backup_footer': 'Backups are stored locally on your device.',
+      'backup_restore_subtitle': 'Export & import local files',
+      'export_data': 'Export Data',
+      'export_data_subtitle': 'CSV/PDF/XLS reports',
+      'export_title': 'Export Reports',
+      'export_subtitle': 'Select date range and format for your report.',
+      'custom': 'Custom',
+      'file_name': 'File Name',
+      'export_settings': 'Export Settings',
+      'edit_columns': 'Edit Columns',
+      'columns_preview': 'Columns Preview',
+      'export_to_file': 'Export to File',
+      'more_rows': '+ 45 more rows',
+      'export_data_label': 'Export Data',
+      'security_privacy': 'Security & Privacy',
+      'security_privacy_subtitle': 'PIN, biometrics, privacy',
+      'security_hero_title': 'Protect your account',
+      'security_hero_subtitle': 'Manage security preferences and privacy settings.',
+      'security_level': 'Security Level',
+      'security_level_high': 'High',
+      'app_access': 'App Access',
+      'biometric_unlock': 'Biometric Unlock',
+      'biometric_unlock_desc': 'Use FaceID or TouchID',
+      'content_protection': 'Content Protection',
+      'screenshot_protection': 'Screenshot Protection',
+      'screenshot_protection_desc': 'Prevents screen capture',
+      'legal_info': 'Legal & Info',
+      'privacy_policy': 'Privacy Policy',
+      'terms_of_service': 'Terms of Service',
+      'offline_policy_note': 'This is an offline app. Policy content is stored locally.',
+      'storage_cleanup': 'Storage & Data',
+      'storage_cleanup_subtitle': 'Cache and data cleanup',
+      'storage_details': 'Details',
+      'storage_used': '17 MB Used',
+      'storage_used_desc': 'Total space used by temporary files and cache.',
+      'cache': 'Cache',
+      'cache_desc': 'Images and api responses',
+      'temp_files': 'Temporary Files',
+      'temp_files_desc': 'Logs and session data',
+      'clear_cache': 'Clear Cache',
+      'cache_cleared': 'Cache cleared',
+      'clear_all_note': 'Clearing all data will reset the app.',
+      'confirm_identity': 'Confirm Identity',
+      'confirm_identity_desc': 'Enter PIN to confirm deletion of all app data.',
+      'clear_all_done': 'All data cleared',
+      'version': 'Version',
+      'release_notes': 'Release Notes',
+      'version_value': 'Final V1 (offline)',
+      'release_notes_value': 'Core offline ledger features.',
+      'copy_diagnostics': 'Copy diagnostic info',
     },
     'zh_CN': {
       'app_title': '记账助手',
@@ -280,6 +421,147 @@ class AppLocalizations {
       'theme_light': '浅色',
       'theme_dark': '深色',
       'currency_label': '货币单位',
+      'help': '帮助',
+      'date': '日期',
+      'display_localization': '显示与本地化',
+      'accounts_bank_section': '银行卡',
+      'accounts_credit_section': '信用卡',
+      'accounts_cash_section': '现金',
+      'add_new_account': '新增账户',
+      'edit_account': '编辑账户',
+      'account_name': '账户名称',
+      'account_name_hint': '例如：招商储蓄',
+      'account_note': '账户备注',
+      'account_note_hint': '例如：**** 4829',
+      'opening_balance': '初始余额',
+      'account_type': '账户类型',
+      'account_type_bank': '银行卡',
+      'account_type_credit': '信用卡',
+      'account_type_cash': '现金',
+      'account_note_empty': '暂无备注',
+      'empty_accounts': '暂无账户',
+      'account_migration': '账户迁移',
+      'account_migration_desc': '批量迁移历史账单',
+      'account_delete_blocked_title': '无法删除',
+      'account_delete_blocked_body': '该账户存在账单，请先迁移或禁用。',
+      'migration_title': '迁移账户数据',
+      'migration_subtitle': '选择源账户与目标账户以转移历史记录。',
+      'migration_source': '源账户',
+      'migration_target': '目标账户',
+      'migration_summary': '迁移摘要',
+      'migration_warning': '迁移后不可撤销，请确认选择。',
+      'migration_help_title': '迁移说明',
+      'migration_help_body': '选择源与目标账户，确认影响条数后执行。',
+      'migration_confirm_body': '迁移不可逆，是否继续？',
+      'migration_done': '迁移完成',
+      'start_migration': '开始迁移',
+      'last_migration': '上次迁移',
+      'never': '从未',
+      'search_categories_tags': '搜索分类与标签',
+      'frequent': '常用',
+      'no_data': '暂无数据',
+      'all_categories': '全部分类',
+      'swipe_hint': '左滑分类可合并或禁用',
+      'records_label': '条记录',
+      'merge_category': '合并分类',
+      'disable_category': '禁用分类',
+      'edit_category': '编辑分类',
+      'no_merge_target': '暂无可合并分类',
+      'add_tag': '新增标签',
+      'tag_name': '标签名称',
+      'category_name': '分类名称',
+      'popular_tags': '热门标签',
+      'new_tag': '新标签',
+      'all': '全部',
+      'active': '启用中',
+      'paused': '已暂停',
+      'pending': '待确认',
+      'pending_confirm': '待确认',
+      'no_recurring': '暂无周期任务',
+      'add_recurring': '新增周期任务',
+      'recurring_placeholder': '周期任务创建将在下一步完善。',
+      'recurring_task': '周期任务',
+      'alerts_reminders': '提醒与通知',
+      'daily_reminders': '每日提醒',
+      'daily_reminders_desc': '每日支出摘要',
+      'schedule': '时间安排',
+      'system_permissions': '系统通知权限',
+      'status_enabled': '状态：已开启',
+      'status_disabled': '状态：未开启',
+      'dnd_title': '免打扰',
+      'dnd_subtitle': '睡眠时段不打扰',
+      'from': '从',
+      'to': '到',
+      'appearance_label': '外观',
+      'formatting_label': '格式',
+      'live_preview': '实时预览',
+      'decimal_places_label': '小数位数',
+      'week_start_label': '周起始日',
+      'week_start_monday': '周一',
+      'week_start_sunday': '周日',
+      'font_size_label': '字体大小',
+      'font_scale_small': '小',
+      'font_scale_default': '标准',
+      'font_scale_large': '大',
+      'language_label': '语言',
+      'app_language_label': '应用语言',
+      'backup_status': '备份状态',
+      'last_backup': '最近备份',
+      'next_scheduled': '下次计划',
+      'backup_next_time': '明天 03:00',
+      'quick_actions': '快捷操作',
+      'backup_format_info': '仅支持 .json 或 .csv，若为加密备份需输入密码。',
+      'local_backups': '本地备份',
+      'backup_footer': '备份文件仅保存在本地设备。',
+      'backup_restore_subtitle': '导出与导入本地文件',
+      'export_data': '导出报表',
+      'export_data_subtitle': 'CSV/PDF/XLS 报表',
+      'export_title': '导出报表',
+      'export_subtitle': '选择时间范围与导出格式。',
+      'custom': '自定义',
+      'file_name': '文件名称',
+      'export_settings': '导出设置',
+      'edit_columns': '编辑列',
+      'columns_preview': '列预览',
+      'export_to_file': '导出到文件',
+      'more_rows': '+ 45 行',
+      'export_data_label': '导出报表',
+      'security_privacy': '安全与隐私',
+      'security_privacy_subtitle': 'PIN、生物识别与隐私',
+      'security_hero_title': '保护你的账户',
+      'security_hero_subtitle': '管理安全偏好与隐私设置。',
+      'security_level': '安全等级',
+      'security_level_high': '高',
+      'app_access': '应用访问',
+      'biometric_unlock': '生物识别解锁',
+      'biometric_unlock_desc': '使用面容或指纹解锁',
+      'content_protection': '内容保护',
+      'screenshot_protection': '截屏保护',
+      'screenshot_protection_desc': '阻止屏幕截图',
+      'legal_info': '法律与说明',
+      'privacy_policy': '隐私政策',
+      'terms_of_service': '服务条款',
+      'offline_policy_note': '离线版本，政策内容存于本地。',
+      'storage_cleanup': '存储与数据清理',
+      'storage_cleanup_subtitle': '缓存与数据管理',
+      'storage_details': '详情',
+      'storage_used': '已使用 17 MB',
+      'storage_used_desc': '临时文件与缓存占用空间。',
+      'cache': '缓存',
+      'cache_desc': '图片与接口响应',
+      'temp_files': '临时文件',
+      'temp_files_desc': '日志与会话数据',
+      'clear_cache': '清理缓存',
+      'cache_cleared': '缓存已清理',
+      'clear_all_note': '清空数据将重置应用。',
+      'confirm_identity': '确认身份',
+      'confirm_identity_desc': '输入 PIN 确认清空数据。',
+      'clear_all_done': '已清空所有数据',
+      'version': '版本',
+      'release_notes': '更新日志',
+      'version_value': 'Final V1（离线版）',
+      'release_notes_value': '完整离线记账能力。',
+      'copy_diagnostics': '复制诊断信息',
     },
   };
 
@@ -421,6 +703,200 @@ class AppLocalizations {
   String get themeLight => _value('theme_light');
   String get themeDark => _value('theme_dark');
   String get currencyLabel => _value('currency_label');
+  String get help => _value('help');
+  String get date => _value('date');
+  String get displayLocalization => _value('display_localization');
+  String get accountsBankSection => _value('accounts_bank_section');
+  String get accountsCreditSection => _value('accounts_credit_section');
+  String get accountsCashSection => _value('accounts_cash_section');
+  String get addNewAccount => _value('add_new_account');
+  String get editAccount => _value('edit_account');
+  String get accountName => _value('account_name');
+  String get accountNameHint => _value('account_name_hint');
+  String get accountNote => _value('account_note');
+  String get accountNoteHint => _value('account_note_hint');
+  String get openingBalance => _value('opening_balance');
+  String get accountType => _value('account_type');
+  String get accountTypeBank => _value('account_type_bank');
+  String get accountTypeCredit => _value('account_type_credit');
+  String get accountTypeCash => _value('account_type_cash');
+  String get accountNoteEmpty => _value('account_note_empty');
+  String get emptyAccounts => _value('empty_accounts');
+  String get accountMigration => _value('account_migration');
+  String get accountMigrationDesc => _value('account_migration_desc');
+  String get accountDeleteBlockedTitle => _value('account_delete_blocked_title');
+  String get accountDeleteBlockedBody => _value('account_delete_blocked_body');
+  String get migrationTitle => _value('migration_title');
+  String get migrationSubtitle => _value('migration_subtitle');
+  String get migrationSource => _value('migration_source');
+  String get migrationTarget => _value('migration_target');
+  String get migrationSummary => _value('migration_summary');
+  String get migrationWarning => _value('migration_warning');
+  String get migrationHelpTitle => _value('migration_help_title');
+  String get migrationHelpBody => _value('migration_help_body');
+  String get migrationConfirmBody => _value('migration_confirm_body');
+  String get migrationDone => _value('migration_done');
+  String get startMigration => _value('start_migration');
+  String get lastMigrationLabel => _value('last_migration');
+  String get never => _value('never');
+  String get searchCategoriesTags => _value('search_categories_tags');
+  String get frequent => _value('frequent');
+  String get noData => _value('no_data');
+  String get allCategories => _value('all_categories');
+  String get swipeHint => _value('swipe_hint');
+  String get recordsLabel => _value('records_label');
+  String get mergeCategory => _value('merge_category');
+  String get disableCategory => _value('disable_category');
+  String get editCategory => _value('edit_category');
+  String get noMergeTarget => _value('no_merge_target');
+  String get addTag => _value('add_tag');
+  String get tagName => _value('tag_name');
+  String get categoryName => _value('category_name');
+  String get popularTags => _value('popular_tags');
+  String get newTag => _value('new_tag');
+  String get all => _value('all');
+  String get active => _value('active');
+  String get paused => _value('paused');
+  String get pending => _value('pending');
+  String get pendingConfirm => _value('pending_confirm');
+  String get noRecurring => _value('no_recurring');
+  String get addRecurring => _value('add_recurring');
+  String get recurringPlaceholder => _value('recurring_placeholder');
+  String get recurringTask => _value('recurring_task');
+  String get alertsReminders => _value('alerts_reminders');
+  String get dailyReminders => _value('daily_reminders');
+  String get dailyRemindersDesc => _value('daily_reminders_desc');
+  String get schedule => _value('schedule');
+  String get systemPermissions => _value('system_permissions');
+  String get statusEnabled => _value('status_enabled');
+  String get statusDisabled => _value('status_disabled');
+  String get dndTitle => _value('dnd_title');
+  String get dndSubtitle => _value('dnd_subtitle');
+  String get from => _value('from');
+  String get to => _value('to');
+  String get appearanceLabel => _value('appearance_label');
+  String get formattingLabel => _value('formatting_label');
+  String get livePreview => _value('live_preview');
+  String get decimalPlacesLabel => _value('decimal_places_label');
+  String get weekStartLabel => _value('week_start_label');
+  String get weekStartMonday => _value('week_start_monday');
+  String get weekStartSunday => _value('week_start_sunday');
+  String get fontSizeLabel => _value('font_size_label');
+  String get fontScaleSmall => _value('font_scale_small');
+  String get fontScaleDefault => _value('font_scale_default');
+  String get fontScaleLarge => _value('font_scale_large');
+  String get languageLabel => _value('language_label');
+  String get appLanguageLabel => _value('app_language_label');
+  String get backupStatus => _value('backup_status');
+  String get lastBackup => _value('last_backup');
+  String get nextScheduled => _value('next_scheduled');
+  String get backupNextTime => _value('backup_next_time');
+  String get quickActions => _value('quick_actions');
+  String get backupFormatInfo => _value('backup_format_info');
+  String get localBackups => _value('local_backups');
+  String get backupFooter => _value('backup_footer');
+  String get backupRestoreSubtitle => _value('backup_restore_subtitle');
+  String get exportData => _value('export_data');
+  String get exportDataSubtitle => _value('export_data_subtitle');
+  String get exportTitle => _value('export_title');
+  String get exportSubtitle => _value('export_subtitle');
+  String get custom => _value('custom');
+  String get fileName => _value('file_name');
+  String get exportSettings => _value('export_settings');
+  String get editColumns => _value('edit_columns');
+  String get columnsPreview => _value('columns_preview');
+  String get exportToFile => _value('export_to_file');
+  String get moreRows => _value('more_rows');
+  String get securityPrivacy => _value('security_privacy');
+  String get securityPrivacySubtitle => _value('security_privacy_subtitle');
+  String get securityHeroTitle => _value('security_hero_title');
+  String get securityHeroSubtitle => _value('security_hero_subtitle');
+  String get securityLevel => _value('security_level');
+  String get securityLevelHigh => _value('security_level_high');
+  String get appAccess => _value('app_access');
+  String get biometricUnlock => _value('biometric_unlock');
+  String get biometricUnlockDesc => _value('biometric_unlock_desc');
+  String get contentProtection => _value('content_protection');
+  String get screenshotProtection => _value('screenshot_protection');
+  String get screenshotProtectionDesc => _value('screenshot_protection_desc');
+  String get legalInfo => _value('legal_info');
+  String get privacyPolicy => _value('privacy_policy');
+  String get termsOfService => _value('terms_of_service');
+  String get offlinePolicyNote => _value('offline_policy_note');
+  String get storageCleanup => _value('storage_cleanup');
+  String get storageCleanupSubtitle => _value('storage_cleanup_subtitle');
+  String get storageDetails => _value('storage_details');
+  String get storageUsed => _value('storage_used');
+  String get storageUsedDesc => _value('storage_used_desc');
+  String get cache => _value('cache');
+  String get cacheDesc => _value('cache_desc');
+  String get tempFiles => _value('temp_files');
+  String get tempFilesDesc => _value('temp_files_desc');
+  String get clearCache => _value('clear_cache');
+  String get cacheCleared => _value('cache_cleared');
+  String get clearAllNote => _value('clear_all_note');
+  String get confirmIdentity => _value('confirm_identity');
+  String get confirmIdentityDesc => _value('confirm_identity_desc');
+  String get clearAllDone => _value('clear_all_done');
+  String get version => _value('version');
+  String get releaseNotes => _value('release_notes');
+  String get versionValue => _value('version_value');
+  String get releaseNotesValue => _value('release_notes_value');
+  String get copyDiagnostics => _value('copy_diagnostics');
+
+  String migrationSummaryBody(int count, String source, String target) {
+    if (locale.languageCode == 'zh') {
+      return '将 $count 条账单从 $source 迁移至 $target。';
+    }
+    return '$count transactions will be moved from $source to $target.';
+  }
+
+  String lastMigration(String date) {
+    if (locale.languageCode == 'zh') {
+      return '上次迁移：$date';
+    }
+    return 'Last migration: $date';
+  }
+
+  String backupItemSubtitle(String date, String size) {
+    if (locale.languageCode == 'zh') {
+      return '$date • $size';
+    }
+    return '$date • $size';
+  }
+
+  String recurringNext(String date) {
+    if (locale.languageCode == 'zh') {
+      return '下次：$date';
+    }
+    return 'Next: $date';
+  }
+
+  String decimalDigits(int digits) {
+    if (locale.languageCode == 'zh') {
+      return '$digits 位小数';
+    }
+    return '$digits Digits';
+  }
+
+  String fontScaleLabel(double value) {
+    if (value <= 0.95) return fontScaleSmall;
+    if (value >= 1.05) return fontScaleLarge;
+    return fontScaleDefault;
+  }
+
+  String languageLabelValue(String value) {
+    if (value == 'zh_CN') return '简体中文';
+    if (value == 'en_US') return 'English (US)';
+    return themeSystem;
+  }
+
+  List<String> get weekLabels {
+    if (locale.languageCode == 'zh') {
+      return const ['日', '一', '二', '三', '四', '五', '六'];
+    }
+    return const ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  }
 }
 
 class _AppLocalizationsDelegate

@@ -7,6 +7,7 @@ import '../data/models.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
+import 'categories_tags_page.dart';
 
 class AddEditTransactionPage extends StatefulWidget {
   const AddEditTransactionPage({super.key, this.record, this.isCopy = false});
@@ -185,14 +186,20 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
             padding: EdgeInsets.fromLTRB(16, 12, 16, _showKeypad ? 240 : 16),
             children: [
               Center(
-                child: Column(
-                  children: [
-                    Text(strings.amount,
-                        style: const TextStyle(color: AppTheme.textMuted)),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                child: InkWell(
+                  onTap: () {
+                    if (!_showKeypad) {
+                      setState(() => _showKeypad = true);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    child: Column(
                       children: [
+                        Text(strings.amount,
+                            style: const TextStyle(color: AppTheme.textMuted)),
+                        const SizedBox(height: 6),
                         Text(
                           Formatters.money(
                             _type == TransactionType.expense
@@ -200,23 +207,17 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                                 : _amountValue,
                             showSign: _type != TransactionType.transfer,
                             locale: locale,
+                            currencyCode: appState.currencyCode,
+                            decimalDigits: appState.decimalPlaces,
                           ),
                           style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          onPressed: _toggleKeypad,
-                          icon: Icon(
-                            _showKeypad ? Symbols.keyboard_hide : Symbols.edit,
-                            size: 18,
-                          ),
-                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -232,7 +233,11 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                   Text(strings.category,
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const CategoriesTagsPage()),
+                      );
+                    },
                     child: Text(strings.edit),
                   ),
                 ],
@@ -353,15 +358,24 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
     );
   }
 
-  void _showTagPicker(AppLocalizations strings, List<String> tags) {
-    showModalBottomSheet<void>(
+  Future<void> _showTagPicker(AppLocalizations strings, List<String> tags) async {
+    final result = await showModalBottomSheet<List<String>>(
       context: context,
+      backgroundColor: const Color(0xFF16202A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) => _TagPickerSheet(
         tags: tags,
         selected: _selectedTags,
-        onChanged: (next) => setState(() => _selectedTags = next),
+        title: strings.tags,
+        confirmLabel: strings.confirm,
+        cancelLabel: strings.cancel,
       ),
     );
+    if (result != null) {
+      setState(() => _selectedTags = result);
+    }
   }
 }
 
@@ -478,7 +492,10 @@ class _CategoryGrid extends StatelessWidget {
                     ? AppTheme.primary
                     : const Color(0xFF1B2632),
                 child: Icon(
-                  IconData(cat.icon, fontFamily: 'MaterialSymbolsOutlined'),
+                  IconData(
+                    cat.icon == 0 ? Symbols.category.codePoint : cat.icon,
+                    fontFamily: 'MaterialSymbolsOutlined',
+                  ),
                   color: selected ? Colors.white : AppTheme.textMuted,
                   size: 18,
                 ),
@@ -509,32 +526,39 @@ class _DropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InputDecorator(
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
-        filled: true,
-        fillColor: const Color(0xFF141E2A),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+    return SizedBox(
+      height: 56,
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+          filled: true,
+          fillColor: const Color(0xFF141E2A),
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
         ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          hint: Text(AppLocalizations.of(context).select),
-          items: items
-              .map(
-                (acc) => DropdownMenuItem(
-                  value: acc.id,
-                  child: Text(acc.name),
-                ),
-              )
-              .toList(),
-          onChanged: (id) {
-            if (id != null) onChanged(id);
-          },
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: value,
+            isExpanded: true,
+            isDense: true,
+            hint: Text(AppLocalizations.of(context).select),
+            items: items
+                .map(
+                  (acc) => DropdownMenuItem(
+                    value: acc.id,
+                    child: Text(acc.name),
+                  ),
+                )
+                .toList(),
+            onChanged: (id) {
+              if (id != null) onChanged(id);
+            },
+          ),
         ),
       ),
     );
@@ -552,23 +576,28 @@ class _DateField extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
-          filled: true,
-          fillColor: const Color(0xFF141E2A),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+      child: SizedBox(
+        height: 56,
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+            filled: true,
+            fillColor: const Color(0xFF141E2A),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(value),
-            const Icon(Symbols.calendar_month, size: 18),
-          ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(value),
+              const Icon(Symbols.calendar_month, size: 18),
+            ],
+          ),
         ),
       ),
     );
@@ -612,9 +641,8 @@ class _Keypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '00'];
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.fromLTRB(8, 6, 8, 10),
       decoration: BoxDecoration(
         color: const Color(0xFF111A25),
         borderRadius: BorderRadius.circular(16),
@@ -622,61 +650,82 @@ class _Keypad extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              onPressed: onHide,
-              icon: const Icon(Symbols.keyboard_hide, size: 18),
-            ),
+          Row(
+            children: [
+              const Spacer(),
+              IconButton(
+                onPressed: onHide,
+                icon: const Icon(Symbols.keyboard_hide, size: 18),
+              ),
+            ],
           ),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 1,
-              crossAxisSpacing: 1,
-              childAspectRatio: 1.2,
-            ),
-            itemCount: 16,
-            itemBuilder: (context, index) {
-              if (index == 3) {
-                return _KeyButton(
-                  child: const Icon(Symbols.backspace, size: 20),
-                  onTap: onBackspace,
-                );
-              }
-              if (index == 7) {
-                return _KeyButton(
-                  child: const Text('C'),
-                  onTap: onBackspace,
-                );
-              }
-              if (index == 11) {
-                return _KeyButton(
+          _KeyRow(
+            children: [
+              _KeyButton(child: const Text('1'), onTap: () => onKeyTap('1')),
+              _KeyButton(child: const Text('2'), onTap: () => onKeyTap('2')),
+              _KeyButton(child: const Text('3'), onTap: () => onKeyTap('3')),
+              _KeyButton(
+                child: const Icon(Symbols.backspace, size: 20),
+                onTap: onBackspace,
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          _KeyRow(
+            children: [
+              _KeyButton(child: const Text('4'), onTap: () => onKeyTap('4')),
+              _KeyButton(child: const Text('5'), onTap: () => onKeyTap('5')),
+              _KeyButton(child: const Text('6'), onTap: () => onKeyTap('6')),
+              _KeyButton(
+                child: const Text('C'),
+                onTap: onBackspace,
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          _KeyRow(
+            children: [
+              _KeyButton(child: const Text('7'), onTap: () => onKeyTap('7')),
+              _KeyButton(child: const Text('8'), onTap: () => onKeyTap('8')),
+              _KeyButton(child: const Text('9'), onTap: () => onKeyTap('9')),
+              const SizedBox.shrink(),
+            ],
+          ),
+          const SizedBox(height: 6),
+          _KeyRow(
+            children: [
+              _KeyButton(child: const Text('.'), onTap: () => onKeyTap('.')),
+              _KeyButton(child: const Text('0'), onTap: () => onKeyTap('0')),
+              _KeyButton(child: const Text('00'), onTap: () => onKeyTap('00')),
+              Expanded(
+                flex: 1,
+                child: _KeyButton(
                   child: const Icon(Symbols.check, size: 20),
                   onTap: onSubmit,
                   highlighted: true,
-                );
-              }
-              final keyIndex = index < 3
-                  ? index
-                  : index < 7
-                      ? index - 1
-                      : index < 11
-                          ? index - 2
-                          : index - 3;
-              if (keyIndex < 0 || keyIndex >= keys.length) {
-                return const SizedBox.shrink();
-              }
-              final label = keys[keyIndex];
-              return _KeyButton(
-                child: Text(label),
-                onTap: () => onKeyTap(label),
-              );
-            },
+                ),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _KeyRow extends StatelessWidget {
+  const _KeyRow({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 58,
+      child: Row(
+        children: children.map((child) {
+          return child is Expanded ? child : Expanded(child: child);
+        }).toList(),
       ),
     );
   }
@@ -714,41 +763,85 @@ class _KeyButton extends StatelessWidget {
   }
 }
 
-class _TagPickerSheet extends StatelessWidget {
+class _TagPickerSheet extends StatefulWidget {
   const _TagPickerSheet({
     required this.tags,
     required this.selected,
-    required this.onChanged,
+    required this.title,
+    required this.confirmLabel,
+    required this.cancelLabel,
   });
 
   final List<String> tags;
   final List<String> selected;
-  final ValueChanged<List<String>> onChanged;
+  final String title;
+  final String confirmLabel;
+  final String cancelLabel;
+
+  @override
+  State<_TagPickerSheet> createState() => _TagPickerSheetState();
+}
+
+class _TagPickerSheetState extends State<_TagPickerSheet> {
+  late final Set<String> _current;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.selected.toSet();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final current = selected.toSet();
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: tags.map((tag) {
-          final isSelected = current.contains(tag);
-          return FilterChip(
-            label: Text(tag),
-            selected: isSelected,
-            onSelected: (value) {
-              final next = Set<String>.from(current);
-              if (value) {
-                next.add(tag);
-              } else {
-                next.remove(tag);
-              }
-              onChanged(next.toList());
-            },
-          );
-        }).toList(),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(widget.title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: widget.tags.map((tag) {
+              final isSelected = _current.contains(tag);
+              return FilterChip(
+                label: Text(tag),
+                selected: isSelected,
+                onSelected: (value) {
+                  setState(() {
+                    if (value) {
+                      _current.add(tag);
+                    } else {
+                      _current.remove(tag);
+                    }
+                  });
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(widget.cancelLabel),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () =>
+                      Navigator.of(context).pop(_current.toList()),
+                  child: Text(widget.confirmLabel),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -6,10 +6,13 @@ import '../theme/app_theme.dart';
 import 'about_page.dart';
 import 'account_management_page.dart';
 import 'categories_tags_page.dart';
-import 'data_security_settings_page.dart';
+import 'data_backup_recovery_page.dart';
 import 'display_security_page.dart';
+import 'export_reports_page.dart';
 import 'recurring_transactions_page.dart';
 import 'reminders_page.dart';
+import 'security_privacy_page.dart';
+import 'storage_cleanup_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -94,9 +97,9 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             _SettingsItem(
-              icon: Symbols.lock,
+              icon: Symbols.palette,
               color: const Color(0xFF14B8A6),
-              title: strings.displaySecurity,
+              title: strings.displayLocalization,
               subtitle: strings.displaySecuritySubtitle,
               onTap: () {
                 Navigator.of(context).push(
@@ -106,15 +109,58 @@ class SettingsPage extends StatelessWidget {
                 );
               },
             ),
+          ]),
+          const SizedBox(height: 16),
+          _SectionTitle(title: strings.dataSecurity),
+          _SettingsGroup(children: [
             _SettingsItem(
               icon: Symbols.cloud_download,
               color: const Color(0xFF6366F1),
-              title: strings.dataManagement,
-              subtitle: strings.dataManagementSubtitle,
+              title: strings.backupRestore,
+              subtitle: strings.backupRestoreSubtitle,
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const DataSecuritySettingsPage(),
+                    builder: (_) => const DataBackupRecoveryPage(),
+                  ),
+                );
+              },
+            ),
+            _SettingsItem(
+              icon: Symbols.ios_share,
+              color: const Color(0xFF10B981),
+              title: strings.exportData,
+              subtitle: strings.exportDataSubtitle,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ExportReportsPage(),
+                  ),
+                );
+              },
+            ),
+            _SettingsItem(
+              icon: Symbols.shield_lock,
+              color: const Color(0xFF0EA5E9),
+              title: strings.securityPrivacy,
+              subtitle: strings.securityPrivacySubtitle,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const SecurityPrivacyPage(),
+                  ),
+                );
+              },
+            ),
+            _SettingsItem(
+              icon: Symbols.storage,
+              color: const Color(0xFFF97316),
+              title: strings.storageCleanup,
+              subtitle: strings.storageCleanupSubtitle,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const StorageCleanupPage(),
                   ),
                 );
               },

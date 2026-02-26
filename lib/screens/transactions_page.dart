@@ -90,8 +90,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               records: records,
                               record: record,
                               locale: locale,
+                              currencyCode: appState.currencyCode,
+                              decimalDigits: appState.decimalPlaces,
                             ),
-                          _TransactionTile(record: record, locale: locale),
+                          _TransactionTile(
+                            record: record,
+                            locale: locale,
+                            currencyCode: appState.currencyCode,
+                            decimalDigits: appState.decimalPlaces,
+                          ),
                         ],
                       );
                     },
@@ -285,12 +292,16 @@ class _GroupHeader extends StatelessWidget {
     required this.records,
     required this.record,
     required this.locale,
+    required this.currencyCode,
+    required this.decimalDigits,
   });
 
   final String label;
   final List<TransactionRecord> records;
   final TransactionRecord record;
   final String locale;
+  final String currencyCode;
+  final int decimalDigits;
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +325,13 @@ class _GroupHeader extends StatelessWidget {
         children: [
           Text(label, style: const TextStyle(color: AppTheme.textMuted)),
           Text(
-            Formatters.money(total, showSign: true, locale: locale),
+            Formatters.money(
+              total,
+              showSign: true,
+              locale: locale,
+              currencyCode: currencyCode,
+              decimalDigits: decimalDigits,
+            ),
             style: TextStyle(
               color: total >= 0 ? Colors.greenAccent : Colors.redAccent,
             ),
@@ -326,10 +343,17 @@ class _GroupHeader extends StatelessWidget {
 }
 
 class _TransactionTile extends StatelessWidget {
-  const _TransactionTile({required this.record, required this.locale});
+  const _TransactionTile({
+    required this.record,
+    required this.locale,
+    required this.currencyCode,
+    required this.decimalDigits,
+  });
 
   final TransactionRecord record;
   final String locale;
+  final String currencyCode;
+  final int decimalDigits;
 
   @override
   Widget build(BuildContext context) {
@@ -397,7 +421,9 @@ class _TransactionTile extends StatelessWidget {
           backgroundColor: Color(category?.colorHex ?? 0xFF334155),
           child: Icon(
             IconData(
-              category?.icon ?? Symbols.swap_horiz.codePoint,
+              (category?.icon ?? 0) == 0
+                  ? Symbols.swap_horiz.codePoint
+                  : category!.icon,
               fontFamily: 'MaterialSymbolsOutlined',
             ),
             color: Colors.white,
@@ -413,6 +439,8 @@ class _TransactionTile extends StatelessWidget {
             record.type == TransactionType.expense ? -record.amount : record.amount,
             showSign: record.type != TransactionType.transfer,
             locale: locale,
+            currencyCode: currencyCode,
+            decimalDigits: decimalDigits,
           ),
           style: TextStyle(fontWeight: FontWeight.w600, color: color),
         ),

@@ -38,6 +38,8 @@ class TransactionDetailPage extends StatelessWidget {
                     : record.amount,
                 showSign: record.type != TransactionType.transfer,
                 locale: locale,
+                currencyCode: appState.currencyCode,
+                decimalDigits: appState.decimalPlaces,
               ),
               style: TextStyle(
                 fontSize: 28,
