@@ -22,7 +22,7 @@ class _CategoriesTagsPageState extends State<CategoriesTagsPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -57,6 +57,11 @@ class _CategoriesTagsPageState extends State<CategoriesTagsPage>
       ),
       _CategoryTabData(
         title: strings.tags,
+        type: null,
+        categories: const [],
+      ),
+      _CategoryTabData(
+        title: strings.accountTypes,
         type: null,
         categories: const [],
       ),
@@ -99,6 +104,7 @@ class _CategoriesTagsPageState extends State<CategoriesTagsPage>
                     query: _query,
                   ),
                   _TagsTab(query: _query),
+                  _AccountTypesTab(query: _query),
                 ],
               ),
             ),
@@ -139,39 +145,94 @@ class _CategoriesTagsPageState extends State<CategoriesTagsPage>
       );
       return;
     }
+    if (_tabController.index == 3) {
+      final nameController = TextEditingController();
+      AccountNature nature = AccountNature.bank;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setModalState) => AlertDialog(
+            title: Text(strings.addAccountType),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(hintText: strings.accountTypeName),
+                ),
+                const SizedBox(height: 12),
+                _NaturePicker(
+                  value: nature,
+                  onChanged: (value) => setModalState(() => nature = value),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(strings.cancel),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final value = nameController.text.trim();
+                  if (value.isEmpty) return;
+                  await appState.addAccountType(name: value, nature: nature);
+                  if (context.mounted) Navigator.of(context).pop();
+                },
+                child: Text(strings.save),
+              ),
+            ],
+          ),
+        ),
+      );
+      return;
+    }
 
     final nameController = TextEditingController();
     CategoryType type =
         _tabController.index == 0 ? CategoryType.expense : CategoryType.income;
+    int selectedIcon = _CategoryIconPicker.icons.first.codePoint;
 
     await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(strings.addCategory),
-        content: TextField(
-          controller: nameController,
-          decoration: InputDecoration(hintText: strings.categoryName),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => AlertDialog(
+          title: Text(strings.addCategory),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(hintText: strings.categoryName),
+              ),
+              const SizedBox(height: 12),
+              _CategoryIconPicker(
+                selected: selectedIcon,
+                onChanged: (value) => setModalState(() => selectedIcon = value),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(strings.cancel),
+            ),
+            TextButton(
+              onPressed: () async {
+                final value = nameController.text.trim();
+                if (value.isEmpty) return;
+                await appState.addCategory(
+                  type,
+                  value,
+                  selectedIcon,
+                  0xFF2B7CEE,
+                );
+                if (context.mounted) Navigator.of(context).pop();
+              },
+              child: Text(strings.save),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(strings.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              final value = nameController.text.trim();
-              if (value.isEmpty) return;
-              await appState.addCategory(
-                type,
-                value,
-                Symbols.category.codePoint,
-                0xFF2B7CEE,
-              );
-              if (context.mounted) Navigator.of(context).pop();
-            },
-            child: Text(strings.save),
-          ),
-        ],
       ),
     );
   }
@@ -387,7 +448,6 @@ class _TagsTab extends StatelessWidget {
                 color: colors[i % colors.length],
                 onDelete: () => appState.removeTag(tags[i]),
               ),
-            _TagAddChip(label: strings.newTag),
           ],
         ),
       ],
@@ -401,6 +461,342 @@ class _TagsTab extends StatelessWidget {
     Color(0xFFFF9F0A),
     Color(0xFFFF2D55),
   ];
+}
+
+class _AccountTypesTab extends StatelessWidget {
+  const _AccountTypesTab({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+    final strings = AppLocalizations.of(context);
+    final types = appState.accountTypes
+        .where((t) => t.name.contains(query))
+        .toList(growable: false);
+
+    if (types.isEmpty) {
+      return Center(
+        child: Text(
+          strings.noAccountTypes,
+          style: const TextStyle(color: AppTheme.textMuted),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      itemCount: types.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, index) => _AccountTypeCard(option: types[index]),
+    );
+  }
+}
+
+class _AccountTypeCard extends StatelessWidget {
+  const _AccountTypeCard({required this.option});
+
+  final AccountTypeOption option;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    final appState = context.read<AppState>();
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1C252E),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Symbols.account_balance_wallet,
+                color: AppTheme.primary),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(option.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(
+                  _natureLabel(option.nature, strings),
+                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton<_AccountTypeAction>(
+            icon: const Icon(Symbols.more_vert, size: 18),
+            onSelected: (value) => _handleAction(
+              context,
+              appState,
+              strings,
+              option,
+              value,
+            ),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: _AccountTypeAction.edit,
+                child: Text(strings.edit),
+              ),
+              PopupMenuItem(
+                value: _AccountTypeAction.delete,
+                child: Text(strings.delete),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleAction(
+    BuildContext context,
+    AppState appState,
+    AppLocalizations strings,
+    AccountTypeOption option,
+    _AccountTypeAction action,
+  ) async {
+    switch (action) {
+      case _AccountTypeAction.edit:
+        final controller = TextEditingController(text: option.name);
+        AccountNature nature = option.nature;
+        final result = await showDialog<_AccountTypeEditResult>(
+          context: context,
+          builder: (context) => StatefulBuilder(
+            builder: (context, setModalState) => AlertDialog(
+              title: Text(strings.editAccountType),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(controller: controller),
+                  const SizedBox(height: 12),
+                  _NaturePicker(
+                    value: nature,
+                    onChanged: (value) => setModalState(() => nature = value),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(strings.cancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(
+                    _AccountTypeEditResult(
+                      name: controller.text,
+                      nature: nature,
+                    ),
+                  ),
+                  child: Text(strings.save),
+                ),
+              ],
+            ),
+          ),
+        );
+        if (result != null && result.name.trim().isNotEmpty) {
+          await appState.updateAccountType(AccountTypeOption(
+            id: option.id,
+            name: result.name.trim(),
+            nature: result.nature,
+          ));
+        }
+        break;
+      case _AccountTypeAction.delete:
+        final ok = await appState.removeAccountType(option.id);
+        if (!context.mounted) return;
+        if (!ok) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(strings.accountTypeDeleteBlocked)),
+          );
+        }
+        break;
+    }
+  }
+
+  String _natureLabel(AccountNature nature, AppLocalizations strings) {
+    switch (nature) {
+      case AccountNature.bank:
+        return strings.accountNatureBank;
+      case AccountNature.credit:
+        return strings.accountNatureCredit;
+      case AccountNature.loan:
+        return strings.accountNatureLoan;
+      case AccountNature.asset:
+        return strings.accountNatureAsset;
+      case AccountNature.liability:
+        return strings.accountNatureLiability;
+    }
+  }
+}
+
+enum _AccountTypeAction { edit, delete }
+
+class _AccountTypeEditResult {
+  const _AccountTypeEditResult({
+    required this.name,
+    required this.nature,
+  });
+
+  final String name;
+  final AccountNature nature;
+}
+
+class _NaturePicker extends StatelessWidget {
+  const _NaturePicker({required this.value, required this.onChanged});
+
+  final AccountNature value;
+  final ValueChanged<AccountNature> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _NatureChip(
+          label: strings.accountNatureBank,
+          selected: value == AccountNature.bank,
+          onTap: () => onChanged(AccountNature.bank),
+        ),
+        _NatureChip(
+          label: strings.accountNatureCredit,
+          selected: value == AccountNature.credit,
+          onTap: () => onChanged(AccountNature.credit),
+        ),
+        _NatureChip(
+          label: strings.accountNatureLoan,
+          selected: value == AccountNature.loan,
+          onTap: () => onChanged(AccountNature.loan),
+        ),
+        _NatureChip(
+          label: strings.accountNatureAsset,
+          selected: value == AccountNature.asset,
+          onTap: () => onChanged(AccountNature.asset),
+        ),
+        _NatureChip(
+          label: strings.accountNatureLiability,
+          selected: value == AccountNature.liability,
+          onTap: () => onChanged(AccountNature.liability),
+        ),
+      ],
+    );
+  }
+}
+
+class _NatureChip extends StatelessWidget {
+  const _NatureChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      selectedColor: AppTheme.primary.withOpacity(0.2),
+    );
+  }
+}
+
+class _CategoryEditResult {
+  const _CategoryEditResult({required this.name, required this.icon});
+
+  final String name;
+  final int icon;
+}
+
+class _CategoryIconPicker extends StatelessWidget {
+  const _CategoryIconPicker({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final int selected;
+  final ValueChanged<int> onChanged;
+
+  static const icons = [
+    Symbols.restaurant,
+    Symbols.shopping_cart,
+    Symbols.local_taxi,
+    Symbols.movie,
+    Symbols.local_cafe,
+    Symbols.fastfood,
+    Symbols.directions_car,
+    Symbols.home,
+    Symbols.school,
+    Symbols.medical_services,
+    Symbols.sports_soccer,
+    Symbols.card_giftcard,
+    Symbols.flight,
+    Symbols.savings,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(AppLocalizations.of(context).selectIcon,
+            style: const TextStyle(color: AppTheme.textMuted)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: icons.map((icon) {
+            final code = icon.codePoint;
+            final isSelected = code == selected;
+            return GestureDetector(
+              onTap: () => onChanged(code),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppTheme.primary.withOpacity(0.2)
+                      : const Color(0xFF0F1820),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? AppTheme.primary : Colors.transparent,
+                    width: 1,
+                  ),
+                ),
+                child: Icon(
+                  IconData(
+                    code,
+                    fontFamily: 'MaterialSymbolsOutlined',
+                    fontPackage: 'material_symbols_icons',
+                  ),
+                  color: isSelected ? AppTheme.primary : AppTheme.textMuted,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
 }
 
 class _FrequentCategory extends StatelessWidget {
@@ -428,6 +824,7 @@ class _FrequentCategory extends StatelessWidget {
                     ? Symbols.category.codePoint
                     : category.icon,
                 fontFamily: 'MaterialSymbolsOutlined',
+                fontPackage: 'material_symbols_icons',
               ),
               color: Color(category.colorHex),
               size: 28,
@@ -496,6 +893,7 @@ class _CategoryCard extends StatelessWidget {
                     ? Symbols.category.codePoint
                     : category.icon,
                 fontFamily: 'MaterialSymbolsOutlined',
+                fontPackage: 'material_symbols_icons',
               ),
               color: Color(category.colorHex),
               size: 20,
@@ -548,29 +946,50 @@ class _CategoryCard extends StatelessWidget {
     switch (action) {
       case _CategoryAction.edit:
         final controller = TextEditingController(text: category.name);
-        final newName = await showDialog<String>(
+        int selectedIcon = category.icon == 0
+            ? Symbols.category.codePoint
+            : category.icon;
+        final result = await showDialog<_CategoryEditResult>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text(strings.editCategory),
-            content: TextField(controller: controller),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(strings.cancel),
+          builder: (context) => StatefulBuilder(
+            builder: (context, setModalState) => AlertDialog(
+              title: Text(strings.editCategory),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(controller: controller),
+                  const SizedBox(height: 12),
+                  _CategoryIconPicker(
+                    selected: selectedIcon,
+                    onChanged: (value) =>
+                        setModalState(() => selectedIcon = value),
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(controller.text),
-                child: Text(strings.save),
-              ),
-            ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(strings.cancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(
+                    _CategoryEditResult(
+                      name: controller.text,
+                      icon: selectedIcon,
+                    ),
+                  ),
+                  child: Text(strings.save),
+                ),
+              ],
+            ),
           ),
         );
-        if (newName != null && newName.trim().isNotEmpty) {
+        if (result != null && result.name.trim().isNotEmpty) {
           await appState.updateCategory(Category(
             id: category.id,
             type: category.type,
-            name: newName.trim(),
-            icon: category.icon,
+            name: result.name.trim(),
+            icon: result.icon,
             colorHex: category.colorHex,
             enabled: category.enabled,
             sortOrder: category.sortOrder,
@@ -649,26 +1068,6 @@ class _TagChip extends StatelessWidget {
       backgroundColor: color.withOpacity(0.12),
       deleteIcon: const Icon(Symbols.close, size: 16),
       onDeleted: onDelete,
-    );
-  }
-}
-
-class _TagAddChip extends StatelessWidget {
-  const _TagAddChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Chip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Symbols.add, size: 14),
-          const SizedBox(width: 4),
-          Text(label),
-        ],
-      ),
     );
   }
 }

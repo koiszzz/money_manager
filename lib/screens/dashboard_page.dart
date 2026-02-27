@@ -425,58 +425,69 @@ class _RecentItem extends StatelessWidget {
         : record.type == TransactionType.expense
             ? Colors.redAccent
             : Colors.blueGrey;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF151F2B),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: Color(category?.colorHex ?? 0xFF334155),
-            child: Icon(
-              IconData(
-                (category?.icon ?? 0) == 0
-                    ? Symbols.swap_horiz.codePoint
-                    : category!.icon,
-                fontFamily: 'MaterialSymbolsOutlined',
-              ),
-              size: 18,
-              color: Colors.white,
-            ),
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AddEditTransactionPage(record: record),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(category?.name ?? '转账',
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text(
-                  '${account.name} · ${Formatters.timeLabel(record.occurredAt, locale: locale)}',
-                  style:
-                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+        );
+      },
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF151F2B),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: Color(category?.colorHex ?? 0xFF334155),
+              child: Icon(
+                IconData(
+                  (category?.icon ?? 0) == 0
+                      ? Symbols.swap_horiz.codePoint
+                      : category!.icon,
+                  fontFamily: 'MaterialSymbolsOutlined',
+                  fontPackage: 'material_symbols_icons',
                 ),
-              ],
+                size: 18,
+                color: Colors.white,
+              ),
             ),
-          ),
-          Text(
-            Formatters.money(
-              record.type == TransactionType.expense
-                  ? -record.amount
-                  : record.amount,
-              showSign: record.type != TransactionType.transfer,
-              locale: locale,
-              currencyCode: currencyCode,
-              decimalDigits: decimalDigits,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(category?.name ?? '转账',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${account.name} · ${Formatters.timeLabel(record.occurredAt, locale: locale)}',
+                    style:
+                        const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-            style: TextStyle(fontWeight: FontWeight.w600, color: color),
-          ),
-        ],
+            Text(
+              Formatters.money(
+                record.type == TransactionType.expense
+                    ? -record.amount
+                    : record.amount,
+                showSign: record.type != TransactionType.transfer,
+                locale: locale,
+                currencyCode: currencyCode,
+                decimalDigits: decimalDigits,
+              ),
+              style: TextStyle(fontWeight: FontWeight.w600, color: color),
+            ),
+          ],
+        ),
       ),
     );
   }

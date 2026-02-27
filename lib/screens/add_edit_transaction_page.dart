@@ -7,7 +7,6 @@ import '../data/models.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
-import 'categories_tags_page.dart';
 
 class AddEditTransactionPage extends StatefulWidget {
   const AddEditTransactionPage({super.key, this.record, this.isCopy = false});
@@ -29,6 +28,7 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
   String? _accountId;
   String? _transferInAccountId;
   List<String> _selectedTags = [];
+  bool _defaultsApplied = false;
 
   @override
   void initState() {
@@ -53,6 +53,26 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_defaultsApplied) return;
+    final appState = context.read<AppState>();
+    if (_accountId == null && appState.accounts.isNotEmpty) {
+      _accountId = appState.accounts.first.id;
+    }
+    if (_type == TransactionType.transfer &&
+        _transferInAccountId == null &&
+        appState.accounts.length > 1) {
+      final target = appState.accounts
+          .firstWhere((acc) => acc.id != _accountId, orElse: () => appState.accounts.first);
+      if (target.id != _accountId) {
+        _transferInAccountId = target.id;
+      }
+    }
+    _defaultsApplied = true;
+  }
+
   double get _amountValue => double.tryParse(_amountInput) ?? 0;
 
   bool get _canSave {
@@ -70,6 +90,17 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
       _type = type;
       if (_type == TransactionType.transfer) {
         _categoryId = null;
+        final appState = context.read<AppState>();
+        if (_transferInAccountId == null ||
+            _transferInAccountId == _accountId) {
+          final target = appState.accounts.firstWhere(
+            (acc) => acc.id != _accountId,
+            orElse: () => appState.accounts.first,
+          );
+          if (target.id != _accountId) {
+            _transferInAccountId = target.id;
+          }
+        }
       }
     });
   }
@@ -178,9 +209,17 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
     final strings = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final appState = context.watch<AppState>();
-    final categories = appState.categoriesByType(_type == TransactionType.income
-        ? TransactionType.income
-        : TransactionType.expense);
+    final allCategories = appState.categoriesByType(
+      _type == TransactionType.income
+          ? TransactionType.income
+          : TransactionType.expense,
+    );
+    final recentCategories = _recentCategories(
+      appState,
+      allCategories,
+      selectedId: _categoryId,
+      limit: 4,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -247,21 +286,18 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                     Text(strings.category,
                         style: const TextStyle(fontWeight: FontWeight.w600)),
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) => const CategoriesTagsPage()),
-                        );
-                      },
+                      onPressed: () =>
+                          _showCategoryPicker(strings, allCategories),
                       child: Text(strings.more),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 _CategoryGrid(
-                  categories: categories,
+                  categories: recentCategories,
                   selectedId: _categoryId,
                   onSelected: (id) => setState(() => _categoryId = id),
+                  limit: 4,
                 ),
                 const SizedBox(height: 16),
               ],
@@ -293,19 +329,30 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
 
                         if (result != null) {
                           setState(() => _accountId = result);
+                          if (_type == TransactionType.transfer &&
+                              _transferInAccountId == result) {
+                            final fallback = appState.accounts.firstWhere(
+                              (acc) => acc.id != result,
+                              orElse: () => appState.accounts.first,
+                            );
+                            if (fallback.id != result) {
+                              _transferInAccountId = fallback.id;
+                            }
+                          }
                         }
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            appState.accounts
+                            appState.accounts.isEmpty
+                                ? ''
+                                : appState.accounts
                                     .firstWhere(
                                       (e) => e.id == _accountId,
                                       orElse: () => appState.accounts.first,
                                     )
-                                    .name ??
-                                '',
+                                    .name,
                           ),
                           const Icon(Symbols.expand_more, size: 18),
                         ],
@@ -368,7 +415,8 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _transferInAccountId == null
+                        _transferInAccountId == null ||
+                                appState.accounts.isEmpty
                             ? AppLocalizations.of(context).select
                             : appState.accounts
                                 .firstWhere((e) => e.id == _transferInAccountId)
@@ -482,6 +530,73 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
       setState(() => _selectedTags = result);
     }
   }
+
+  Future<void> _showCategoryPicker(
+    AppLocalizations strings,
+    List<Category> categories,
+  ) async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: const Color(0xFF16202A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _CategoryPickerSheet(
+        categories: categories,
+        selectedId: _categoryId,
+        title: strings.category,
+      ),
+    );
+    if (result != null) {
+      setState(() => _categoryId = result);
+    }
+  }
+
+  List<Category> _recentCategories(
+    AppState appState,
+    List<Category> categories, {
+    required String? selectedId,
+    int limit = 4,
+  }) {
+    final lastUsed = <String, DateTime>{};
+    for (final record in appState.records) {
+      if (record.categoryId == null) continue;
+      if (_type == TransactionType.income &&
+          record.type != TransactionType.income) {
+        continue;
+      }
+      if (_type == TransactionType.expense &&
+          record.type != TransactionType.expense) {
+        continue;
+      }
+      lastUsed[record.categoryId!] = record.occurredAt;
+    }
+    final sorted = [...categories];
+    sorted.sort((a, b) {
+      final aDate = lastUsed[a.id];
+      final bDate = lastUsed[b.id];
+      if (aDate == null && bDate == null) {
+        return a.sortOrder.compareTo(b.sortOrder);
+      }
+      if (aDate == null) return 1;
+      if (bDate == null) return -1;
+      return bDate.compareTo(aDate);
+    });
+    if (sorted.length <= limit) return sorted;
+    final trimmed = sorted.take(limit).toList();
+    if (selectedId != null &&
+        !trimmed.any((c) => c.id == selectedId)) {
+      final selected = categories.firstWhere(
+        (c) => c.id == selectedId,
+        orElse: () => trimmed.first,
+      );
+      if (!trimmed.any((c) => c.id == selected.id)) {
+        trimmed.removeLast();
+        trimmed.add(selected);
+      }
+    }
+    return trimmed;
+  }
 }
 
 class _TypeTabs extends StatelessWidget {
@@ -566,26 +681,35 @@ class _CategoryGrid extends StatelessWidget {
     required this.categories,
     required this.selectedId,
     required this.onSelected,
+    this.limit,
+    this.scrollable = false,
   });
 
   final List<Category> categories;
   final String? selectedId;
   final ValueChanged<String> onSelected;
+  final int? limit;
+  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
+    final display = limit == null || categories.length <= limit!
+        ? categories
+        : categories.take(limit!).toList();
     return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: !scrollable,
+      physics: scrollable
+          ? const AlwaysScrollableScrollPhysics()
+          : const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
         childAspectRatio: 1,
       ),
-      itemCount: categories.length > 8 ? 8 : categories.length,
+      itemCount: display.length,
       itemBuilder: (context, index) {
-        final cat = categories[index];
+        final cat = display[index];
         final selected = cat.id == selectedId;
 
         return Material(
@@ -711,6 +835,44 @@ class _TagAddChip extends StatelessWidget {
         ],
       ),
       onPressed: onTap,
+    );
+  }
+}
+
+class _CategoryPickerSheet extends StatelessWidget {
+  const _CategoryPickerSheet({
+    required this.categories,
+    required this.selectedId,
+    required this.title,
+  });
+
+  final List<Category> categories;
+  final String? selectedId;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 320,
+            child: _CategoryGrid(
+              categories: categories,
+              selectedId: selectedId,
+              onSelected: (id) => Navigator.of(context).pop(id),
+              scrollable: true,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

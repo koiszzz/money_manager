@@ -8,7 +8,14 @@ import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 
 class AccountMigrationPage extends StatefulWidget {
-  const AccountMigrationPage({super.key});
+  const AccountMigrationPage({
+    super.key,
+    this.initialSourceId,
+    this.initialTargetId,
+  });
+
+  final String? initialSourceId;
+  final String? initialTargetId;
 
   @override
   State<AccountMigrationPage> createState() => _AccountMigrationPageState();
@@ -19,18 +26,36 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
   String? _targetId;
 
   @override
+  void initState() {
+    super.initState();
+    _sourceId = widget.initialSourceId;
+    _targetId = widget.initialTargetId;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final strings = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
 
     final accounts = appState.accounts;
-    final sourceAccount =
-        accounts.where((a) => a.id == _sourceId).cast().toList();
-    final targetAccount =
-        accounts.where((a) => a.id == _targetId).cast().toList();
-    final source = sourceAccount.isEmpty ? null : sourceAccount.first;
-    final target = targetAccount.isEmpty ? null : targetAccount.first;
+    final source = _sourceId == null
+        ? null
+        : accounts.firstWhere(
+            (a) => a.id == _sourceId,
+            orElse: () => accounts.first,
+          );
+    final filteredTargets = source == null
+        ? accounts
+        : accounts
+            .where((a) => a.nature == source.nature && a.id != source.id)
+            .toList();
+    final target = _targetId == null
+        ? null
+        : filteredTargets.firstWhere(
+            (a) => a.id == _targetId,
+            orElse: () => filteredTargets.isEmpty ? accounts.first : filteredTargets.first,
+          );
 
     final count = _sourceId == null
         ? 0
@@ -62,9 +87,24 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
                   const SizedBox(height: 20),
                   _PickerField(
                     label: strings.migrationSource,
-                    value: source?.name,
+                    value: _sourceId,
                     items: accounts,
-                    onChanged: (id) => setState(() => _sourceId = id),
+                    labelBuilder: (acc) => acc.name,
+                    onChanged: (id) {
+                      setState(() {
+                        _sourceId = id;
+                        final sourceAccount =
+                            accounts.firstWhere((a) => a.id == id);
+                        final nextTargets = accounts
+                            .where((a) =>
+                                a.nature == sourceAccount.nature &&
+                                a.id != sourceAccount.id)
+                            .toList();
+                        _targetId = nextTargets.isNotEmpty
+                            ? nextTargets.first.id
+                            : null;
+                      });
+                    },
                   ),
                   const SizedBox(height: 16),
                   Center(
@@ -81,8 +121,9 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
                   const SizedBox(height: 16),
                   _PickerField(
                     label: strings.migrationTarget,
-                    value: target?.name,
-                    items: accounts.where((a) => a.id != _sourceId).toList(),
+                    value: _targetId,
+                    items: filteredTargets,
+                    labelBuilder: (acc) => acc.name,
                     onChanged: (id) => setState(() => _targetId = id),
                   ),
                   const SizedBox(height: 20),
@@ -97,6 +138,7 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -120,6 +162,8 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
                         color: AppTheme.textMuted, fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 12),
+                  _MigrationHistoryList(),
                 ],
               ),
             )
@@ -152,6 +196,14 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
       );
       return;
     }
+    final source = appState.accounts.firstWhere((a) => a.id == _sourceId);
+    final target = appState.accounts.firstWhere((a) => a.id == _targetId);
+    if (source.nature != target.nature) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.migrationTypeMismatch)),
+      );
+      return;
+    }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -175,6 +227,7 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(strings.migrationDone)),
     );
+    Navigator.of(context).pop();
   }
 }
 
@@ -220,16 +273,22 @@ class _PickerField extends StatelessWidget {
     required this.label,
     required this.value,
     required this.items,
+    required this.labelBuilder,
     required this.onChanged,
   });
 
   final String label;
   final String? value;
   final List items;
+  final String Function(dynamic) labelBuilder;
   final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
+    final ids = items
+        .map((e) => (e as dynamic).id as String)
+        .toList(growable: false);
+    final safeValue = value != null && ids.contains(value) ? value : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -245,13 +304,13 @@ class _PickerField extends StatelessWidget {
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               isExpanded: true,
-              value: value,
+              value: safeValue,
               hint: Text(AppLocalizations.of(context).select),
               items: [
                 for (final account in items)
                   DropdownMenuItem(
                     value: (account as dynamic).id as String,
-                    child: Text((account as dynamic).name as String),
+                    child: Text(labelBuilder(account)),
                   ),
               ],
               onChanged: (id) {
@@ -346,6 +405,55 @@ class _WarningCard extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+}
+
+class _MigrationHistoryList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+    final strings = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final history = appState.migrationHistory;
+    if (history.isEmpty) {
+      return Text(
+        strings.migrationHistoryEmpty,
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+      );
+    }
+    return Column(
+      children: [
+        Text(
+          strings.migrationHistoryTitle,
+          style: const TextStyle(
+            color: AppTheme.textMuted,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...history.map((item) {
+          final date = DateTime.tryParse(item['at']?.toString() ?? '');
+          final label = date == null
+              ? '--'
+              : Formatters.dateLabel(date, locale: locale);
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              strings.migrationHistoryItem(
+                label,
+                item['source']?.toString() ?? '--',
+                item['target']?.toString() ?? '--',
+                item['count']?.toString() ?? '0',
+              ),
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+            ),
+          );
+        }),
+      ],
     );
   }
 }

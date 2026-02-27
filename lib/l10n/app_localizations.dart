@@ -68,6 +68,15 @@ class AppLocalizations {
       'view_all': 'View All',
       'trends': 'Trends',
       'top_spending': 'Top Spending',
+      'expense_breakdown': 'Expense Breakdown',
+      'income_breakdown': 'Income Breakdown',
+      'expense_ranking': 'Expense Ranking',
+      'income_ranking': 'Income Ranking',
+      'trend_income': 'Income',
+      'trend_expense': 'Expense',
+      'trend_net': 'Net',
+      'custom_range': 'Custom Range',
+      'select_year': 'Select Year',
       'transactions_title': 'Transactions',
       'search_hint': 'Search bills, notes...',
       'all_time': 'All Time',
@@ -164,7 +173,32 @@ class AppLocalizations {
       'account_type_bank': 'Bank',
       'account_type_credit': 'Credit',
       'account_type_cash': 'Cash',
+      'account_types': 'Account Types',
+      'add_account_type': 'Add Account Type',
+      'edit_account_type': 'Edit Account Type',
+      'account_type_name': 'Type name',
+      'no_account_types': 'No account types yet',
+      'account_type_delete_blocked': 'This type is used by accounts.',
+      'account_nature_bank': 'Bank Card',
+      'account_nature_credit': 'Credit Card',
+      'account_nature_loan': 'Loan',
+      'account_nature_asset': 'Other Assets',
+      'account_nature_liability': 'Other Liabilities',
+      'select_icon': 'Select icon',
       'account_note_empty': 'No note',
+      'custom_type': 'Custom type',
+      'custom_type_hint': 'e.g. Crypto Wallet',
+      'account_icon': 'Account icon',
+      'accounts_other_section': 'Other Assets',
+      'card_number': 'Card Number',
+      'card_number_hint': 'e.g. 1234 5678 9012 3456',
+      'billing_day': 'Billing Day',
+      'billing_day_hint': '1-31',
+      'repayment_day': 'Repayment Day',
+      'repayment_day_hint': '1-31',
+      'migration_type_mismatch': 'Only accounts of the same type can be merged.',
+      'migration_history_title': 'Migration History',
+      'migration_history_empty': 'No migration history yet',
       'empty_accounts': 'No accounts yet',
       'account_migration': 'Account Migration',
       'account_migration_desc': 'Move historical bills to another account',
@@ -351,6 +385,15 @@ class AppLocalizations {
       'view_all': '查看全部',
       'trends': '趋势',
       'top_spending': '支出排行',
+      'expense_breakdown': '支出分类',
+      'income_breakdown': '收入分类',
+      'expense_ranking': '支出排行',
+      'income_ranking': '收入排行',
+      'trend_income': '收入',
+      'trend_expense': '支出',
+      'trend_net': '净资产',
+      'custom_range': '自定义区间',
+      'select_year': '选择年份',
       'transactions_title': '账单',
       'search_hint': '搜索账单、备注...',
       'all_time': '全部',
@@ -447,7 +490,32 @@ class AppLocalizations {
       'account_type_bank': '银行卡',
       'account_type_credit': '信用卡',
       'account_type_cash': '现金',
+      'account_types': '账户类型',
+      'add_account_type': '新增账户类型',
+      'edit_account_type': '编辑账户类型',
+      'account_type_name': '类型名称',
+      'no_account_types': '暂无账户类型',
+      'account_type_delete_blocked': '该类型已被账户使用，无法删除。',
+      'account_nature_bank': '银行卡',
+      'account_nature_credit': '信用卡',
+      'account_nature_loan': '贷款',
+      'account_nature_asset': '其他资产',
+      'account_nature_liability': '其他负债',
+      'select_icon': '选择图标',
       'account_note_empty': '暂无备注',
+      'custom_type': '自定义类型',
+      'custom_type_hint': '例如：数字钱包',
+      'account_icon': '账户图标',
+      'accounts_other_section': '其他资产',
+      'card_number': '卡号',
+      'card_number_hint': '例如：**** 4829',
+      'billing_day': '账单日',
+      'billing_day_hint': '1-31',
+      'repayment_day': '还款日',
+      'repayment_day_hint': '1-31',
+      'migration_type_mismatch': '只能合并同类型账户。',
+      'migration_history_title': '迁移历史',
+      'migration_history_empty': '暂无迁移记录',
       'empty_accounts': '暂无账户',
       'account_migration': '账户迁移',
       'account_migration_desc': '批量迁移历史账单',
@@ -634,6 +702,15 @@ class AppLocalizations {
   String get viewAll => _value('view_all');
   String get trends => _value('trends');
   String get topSpending => _value('top_spending');
+  String get expenseBreakdown => _value('expense_breakdown');
+  String get incomeBreakdown => _value('income_breakdown');
+  String get expenseRanking => _value('expense_ranking');
+  String get incomeRanking => _value('income_ranking');
+  String get trendIncome => _value('trend_income');
+  String get trendExpense => _value('trend_expense');
+  String get trendNet => _value('trend_net');
+  String get customRange => _value('custom_range');
+  String get selectYear => _value('select_year');
   String get transactionsTitle => _value('transactions_title');
   String get searchHint => _value('search_hint');
   String get allTime => _value('all_time');
@@ -730,7 +807,44 @@ class AppLocalizations {
   String get accountTypeBank => _value('account_type_bank');
   String get accountTypeCredit => _value('account_type_credit');
   String get accountTypeCash => _value('account_type_cash');
+  String get accountTypes => _value('account_types');
+  String get addAccountType => _value('add_account_type');
+  String get editAccountType => _value('edit_account_type');
+  String get accountTypeName => _value('account_type_name');
+  String get noAccountTypes => _value('no_account_types');
+  String get accountTypeDeleteBlocked => _value('account_type_delete_blocked');
+  String get accountNatureBank => _value('account_nature_bank');
+  String get accountNatureCredit => _value('account_nature_credit');
+  String get accountNatureLoan => _value('account_nature_loan');
+  String get accountNatureAsset => _value('account_nature_asset');
+  String get accountNatureLiability => _value('account_nature_liability');
+  String get selectIcon => _value('select_icon');
   String get accountNoteEmpty => _value('account_note_empty');
+  String get customType => _value('custom_type');
+  String get customTypeHint => _value('custom_type_hint');
+  String get accountIcon => _value('account_icon');
+  String get accountsOtherSection => _value('accounts_other_section');
+  String get cardNumber => _value('card_number');
+  String get cardNumberHint => _value('card_number_hint');
+  String get billingDay => _value('billing_day');
+  String get billingDayHint => _value('billing_day_hint');
+  String get repaymentDay => _value('repayment_day');
+  String get repaymentDayHint => _value('repayment_day_hint');
+  String get migrationTypeMismatch => _value('migration_type_mismatch');
+  String get migrationHistoryTitle => _value('migration_history_title');
+  String get migrationHistoryEmpty => _value('migration_history_empty');
+
+  String migrationHistoryItem(
+    String date,
+    String source,
+    String target,
+    String count,
+  ) {
+    if (locale.languageCode == 'zh') {
+      return '$date：$source → $target（$count 条）';
+    }
+    return '$date: $source → $target ($count)';
+  }
   String get emptyAccounts => _value('empty_accounts');
   String get accountMigration => _value('account_migration');
   String get accountMigrationDesc => _value('account_migration_desc');

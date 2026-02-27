@@ -8,7 +8,6 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import 'add_edit_transaction_page.dart';
-import 'transaction_detail_page.dart';
 
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
@@ -417,7 +416,7 @@ class _TransactionTile extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => TransactionDetailPage(recordId: record.id),
+              builder: (_) => AddEditTransactionPage(record: record),
             ),
           );
         },
@@ -429,6 +428,7 @@ class _TransactionTile extends StatelessWidget {
                   ? Symbols.swap_horiz.codePoint
                   : category!.icon,
               fontFamily: 'MaterialSymbolsOutlined',
+              fontPackage: 'material_symbols_icons',
             ),
             color: Colors.white,
             size: 18,

@@ -23,6 +23,7 @@ class AppState extends ChangeNotifier {
   late List<Category> _categories;
   late List<Budget> _budgets;
   late List<RecurringTask> _recurringTasks;
+  List<AccountTypeOption> _accountTypes = [];
   List<String> _tags = [];
   Map<String, String> _settings = {};
 
@@ -36,6 +37,8 @@ class AppState extends ChangeNotifier {
   List<Category> get categories => List.unmodifiable(_categories);
   List<Budget> get budgets => List.unmodifiable(_budgets);
   List<RecurringTask> get recurringTasks => List.unmodifiable(_recurringTasks);
+  List<AccountTypeOption> get accountTypes =>
+      List.unmodifiable(_accountTypes);
   List<String> get tags => List.unmodifiable(_tags);
 
   bool get initialized => _initialized;
@@ -65,6 +68,20 @@ class AppState extends ChangeNotifier {
       double.tryParse(_settings['font_scale'] ?? '1.0') ?? 1.0;
   String? get lastBackupAt => _settings['last_backup_at'];
   String? get lastMigrationAt => _settings['last_migration_at'];
+  List<Map<String, dynamic>> get migrationHistory {
+    final raw = _settings['migration_history'];
+    if (raw == null) return [];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is List) {
+        return decoded
+            .whereType<Map>()
+            .map((e) => e.map((k, v) => MapEntry(k.toString(), v)))
+            .toList();
+      }
+    } catch (_) {}
+    return [];
+  }
 
   set tabIndex(int value) {
     if (_tabIndex == value) return;
@@ -162,10 +179,74 @@ class AppState extends ChangeNotifier {
     await _setSetting('last_migration_at', time.toIso8601String());
   }
 
+  Future<void> addMigrationHistory({
+    required String sourceName,
+    required String targetName,
+    required int count,
+    required DateTime at,
+  }) async {
+    final history = migrationHistory;
+    history.insert(0, {
+      'source': sourceName,
+      'target': targetName,
+      'count': count,
+      'at': at.toIso8601String(),
+    });
+    if (history.length > 5) {
+      history.removeRange(5, history.length);
+    }
+    await _setSetting('migration_history', jsonEncode(history));
+  }
+
   Future<void> addTag(String tag) async {
     if (_tags.contains(tag)) return;
     _tags = [..._tags, tag];
     await _setSetting('tags', jsonEncode(_tags));
+  }
+
+  AccountTypeOption? accountTypeById(String? id) {
+    if (id == null) return null;
+    for (final item in _accountTypes) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
+
+  Future<void> addAccountType({
+    required String name,
+    required AccountNature nature,
+  }) async {
+    final option = AccountTypeOption(
+      id: _uuid.v4(),
+      name: name,
+      nature: nature,
+    );
+    _accountTypes = [..._accountTypes, option];
+    await _setSetting(
+      'account_types',
+      jsonEncode(_accountTypes.map((e) => e.toMap()).toList()),
+    );
+  }
+
+  Future<void> updateAccountType(AccountTypeOption updated) async {
+    final index = _accountTypes.indexWhere((t) => t.id == updated.id);
+    if (index == -1) return;
+    _accountTypes[index] = updated;
+    await _setSetting(
+      'account_types',
+      jsonEncode(_accountTypes.map((e) => e.toMap()).toList()),
+    );
+  }
+
+  Future<bool> removeAccountType(String id) async {
+    final used = _accounts.any((acc) => acc.customType == id);
+    if (used) return false;
+    _accountTypes = _accountTypes.where((t) => t.id != id).toList();
+    await _setSetting(
+      'account_types',
+      jsonEncode(_accountTypes.map((e) => e.toMap()).toList()),
+    );
+    return true;
   }
 
   Future<void> removeTag(String tag) async {
@@ -193,21 +274,33 @@ class AppState extends ChangeNotifier {
 
   Future<void> addAccount({
     required String name,
-    required AccountType type,
+    required AccountNature nature,
+    required String accountTypeId,
     required double openingBalance,
     String? note,
+    int? iconCode,
+    String? cardNumber,
+    int? billingDay,
+    int? repaymentDay,
   }) async {
+    final accountType = _mapNatureToAccountType(nature);
     final maxOrder = _accounts
-        .where((a) => a.type == type)
+        .where((a) => a.nature == nature)
         .fold<int>(-1, (max, item) => item.sortOrder > max ? item.sortOrder : max);
     final account = Account(
       id: _uuid.v4(),
       name: name,
-      type: type,
+      type: accountType,
+      nature: nature,
       openingBalance: openingBalance,
       note: note,
       enabled: true,
       sortOrder: maxOrder + 1,
+      iconCode: iconCode,
+      customType: accountTypeId,
+      cardNumber: cardNumber,
+      billingDay: billingDay,
+      repaymentDay: repaymentDay,
     );
     _accounts = [..._accounts, account];
     await _db.insert('accounts', account.toMap());
@@ -231,10 +324,16 @@ class AppState extends ChangeNotifier {
       id: current.id,
       name: current.name,
       type: current.type,
+      nature: current.nature,
       openingBalance: current.openingBalance,
       note: current.note,
       enabled: enabled,
       sortOrder: current.sortOrder,
+      iconCode: current.iconCode,
+      customType: current.customType,
+      cardNumber: current.cardNumber,
+      billingDay: current.billingDay,
+      repaymentDay: current.repaymentDay,
     );
     await updateAccount(updated);
   }
@@ -246,10 +345,16 @@ class AppState extends ChangeNotifier {
         id: account.id,
         name: account.name,
         type: account.type,
+        nature: account.nature,
         openingBalance: account.openingBalance,
         note: account.note,
         enabled: account.enabled,
         sortOrder: i,
+        iconCode: account.iconCode,
+        customType: account.customType,
+        cardNumber: account.cardNumber,
+        billingDay: account.billingDay,
+        repaymentDay: account.repaymentDay,
       );
       final index = _accounts.indexWhere((a) => a.id == account.id);
       if (index != -1) {
@@ -281,6 +386,9 @@ class AppState extends ChangeNotifier {
     required String targetId,
   }) async {
     if (sourceId == targetId) return;
+    final source = accountById(sourceId);
+    final target = accountById(targetId);
+    final count = countRecordsForAccount(sourceId);
     for (var i = 0; i < _records.length; i++) {
       final record = _records[i];
       var updated = record;
@@ -306,6 +414,13 @@ class AppState extends ChangeNotifier {
       whereArgs: [sourceId],
     );
     await updateLastMigrationAt(DateTime.now());
+    await addMigrationHistory(
+      sourceName: source.name,
+      targetName: target.name,
+      count: count,
+      at: DateTime.now(),
+    );
+    await deleteAccount(sourceId);
     notifyListeners();
   }
 
@@ -345,10 +460,12 @@ class AppState extends ChangeNotifier {
       id: _uuid.v4(),
       name: 'Cash',
       type: AccountType.cash,
+      nature: AccountNature.asset,
       openingBalance: 0,
       note: null,
       enabled: true,
       sortOrder: 0,
+      customType: 'type_cash',
     );
     final defaultCategory = Category(
       id: _uuid.v4(),
@@ -384,8 +501,11 @@ class AppState extends ChangeNotifier {
       'week_start': 'Monday',
       'app_language': 'system',
       'font_scale': '1.0',
+      'account_types':
+          jsonEncode(_defaultAccountTypes().map((e) => e.toMap()).toList()),
     };
     _tags = _loadTags();
+    _accountTypes = _loadAccountTypes();
     notifyListeners();
   }
 
@@ -411,6 +531,13 @@ class AppState extends ChangeNotifier {
     await _db.insert('settings', {
       'key': 'tags',
       'value': jsonEncode(['家庭', '通勤', '订阅', '旅行', '必要'])
+    });
+    await _db.insert('settings', {'key': 'migration_history', 'value': '[]'});
+    await _db.insert('settings', {
+      'key': 'account_types',
+      'value': jsonEncode(
+        _defaultAccountTypes().map((e) => e.toMap()).toList(),
+      ),
     });
   }
   Future<void> updateCategory(Category updated) async {
@@ -700,6 +827,13 @@ class AppState extends ChangeNotifier {
         row['key'] as String: row['value'] as String,
     };
     _tags = _loadTags();
+    _accountTypes = _loadAccountTypes();
+    if (!_settings.containsKey('account_types')) {
+      await _setSetting(
+        'account_types',
+        jsonEncode(_accountTypes.map((e) => e.toMap()).toList()),
+      );
+    }
 
     _initialized = true;
     notifyListeners();
@@ -714,6 +848,68 @@ class AppState extends ChangeNotifier {
       }
     }
     return ['家庭', '通勤', '订阅', '旅行', '必要'];
+  }
+
+  List<AccountTypeOption> _loadAccountTypes() {
+    final raw = _settings['account_types'];
+    if (raw != null) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          return decoded
+              .whereType<Map>()
+              .map((e) => e.map((k, v) => MapEntry(k.toString(), v)))
+              .map(AccountTypeOptionMapping.fromMap)
+              .toList();
+        }
+      } catch (_) {}
+    }
+    return _defaultAccountTypes();
+  }
+
+  List<AccountTypeOption> _defaultAccountTypes() {
+    return [
+      AccountTypeOption(
+        id: 'type_bank',
+        name: '银行卡',
+        nature: AccountNature.bank,
+      ),
+      AccountTypeOption(
+        id: 'type_credit',
+        name: '信用卡',
+        nature: AccountNature.credit,
+      ),
+      AccountTypeOption(
+        id: 'type_loan',
+        name: '贷款',
+        nature: AccountNature.loan,
+      ),
+      AccountTypeOption(
+        id: 'type_cash',
+        name: '现金',
+        nature: AccountNature.asset,
+      ),
+      AccountTypeOption(
+        id: 'type_liability',
+        name: '其他负债',
+        nature: AccountNature.liability,
+      ),
+    ];
+  }
+
+  AccountType _mapNatureToAccountType(AccountNature nature) {
+    switch (nature) {
+      case AccountNature.bank:
+        return AccountType.bank;
+      case AccountNature.credit:
+        return AccountType.creditCard;
+      case AccountNature.loan:
+        return AccountType.other;
+      case AccountNature.asset:
+        return AccountType.other;
+      case AccountNature.liability:
+        return AccountType.other;
+    }
   }
 
   Future<void> _seedData() async {

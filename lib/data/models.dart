@@ -2,6 +2,39 @@ enum TransactionType { expense, income, transfer }
 
 enum AccountType { cash, debitCard, creditCard, bank, other }
 
+enum AccountNature { bank, credit, loan, asset, liability }
+
+class AccountTypeOption {
+  AccountTypeOption({
+    required this.id,
+    required this.name,
+    required this.nature,
+  });
+
+  final String id;
+  final String name;
+  final AccountNature nature;
+}
+
+extension AccountTypeOptionMapping on AccountTypeOption {
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name,
+        'nature': nature.name,
+      };
+
+  static AccountTypeOption fromMap(Map<String, dynamic> map) {
+    return AccountTypeOption(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      nature: AccountNature.values.firstWhere(
+        (e) => e.name == map['nature'],
+        orElse: () => AccountNature.asset,
+      ),
+    );
+  }
+}
+
 enum CategoryType { expense, income }
 
 class Account {
@@ -9,19 +42,31 @@ class Account {
     required this.id,
     required this.name,
     required this.type,
+    required this.nature,
     required this.openingBalance,
     this.note,
     this.enabled = true,
     this.sortOrder = 0,
+    this.iconCode,
+    this.customType,
+    this.cardNumber,
+    this.billingDay,
+    this.repaymentDay,
   });
 
   final String id;
   final String name;
   final AccountType type;
+  final AccountNature nature;
   final double openingBalance;
   final String? note;
   final bool enabled;
   final int sortOrder;
+  final int? iconCode;
+  final String? customType;
+  final String? cardNumber;
+  final int? billingDay;
+  final int? repaymentDay;
 }
 
 extension AccountMapping on Account {
@@ -29,22 +74,61 @@ extension AccountMapping on Account {
         'id': id,
         'name': name,
         'type': type.name,
+        'nature': nature.name,
         'opening_balance': openingBalance,
         'note': note,
         'enabled': enabled ? 1 : 0,
         'sort_order': sortOrder,
+        'icon_code': iconCode,
+        'custom_type': customType,
+        'card_number': cardNumber,
+        'billing_day': billingDay,
+        'repayment_day': repaymentDay,
       };
 
   static Account fromMap(Map<String, dynamic> map) {
+    final accountType =
+        AccountType.values.firstWhere((e) => e.name == map['type']);
+    final natureName = map['nature']?.toString();
+    AccountNature? nature;
+    if (natureName != null) {
+      for (final item in AccountNature.values) {
+        if (item.name == natureName) {
+          nature = item;
+          break;
+        }
+      }
+    }
+    nature ??= _inferNatureFromType(accountType);
     return Account(
       id: map['id'] as String,
       name: map['name'] as String,
-      type: AccountType.values.firstWhere((e) => e.name == map['type']),
+      type: accountType,
+      nature: nature,
       openingBalance: (map['opening_balance'] as num).toDouble(),
       note: map['note'] as String?,
       enabled: (map['enabled'] as num) == 1,
       sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
+      iconCode: (map['icon_code'] as num?)?.toInt(),
+      customType: map['custom_type'] as String?,
+      cardNumber: map['card_number'] as String?,
+      billingDay: (map['billing_day'] as num?)?.toInt(),
+      repaymentDay: (map['repayment_day'] as num?)?.toInt(),
     );
+  }
+}
+
+AccountNature _inferNatureFromType(AccountType type) {
+  switch (type) {
+    case AccountType.bank:
+    case AccountType.debitCard:
+      return AccountNature.bank;
+    case AccountType.creditCard:
+      return AccountNature.credit;
+    case AccountType.cash:
+      return AccountNature.asset;
+    case AccountType.other:
+      return AccountNature.asset;
   }
 }
 

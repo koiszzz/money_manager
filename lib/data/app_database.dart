@@ -21,17 +21,23 @@ class AppDatabase {
     final path = join(dbPath, 'money_manager.db');
     return openDatabase(
       path,
-      version: 2,
+      version: 5,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE accounts (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             type TEXT NOT NULL,
+            nature TEXT NOT NULL,
             opening_balance REAL NOT NULL,
             note TEXT,
             enabled INTEGER NOT NULL,
-            sort_order INTEGER NOT NULL
+            sort_order INTEGER NOT NULL,
+            icon_code INTEGER,
+            custom_type TEXT,
+            card_number TEXT,
+            billing_day INTEGER,
+            repayment_day INTEGER
           );
         ''');
         await db.execute('''
@@ -92,6 +98,30 @@ class AppDatabase {
           );
           await db.execute(
             'ALTER TABLE categories ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0;',
+          );
+        }
+        if (oldVersion < 3) {
+          await db.execute(
+            'ALTER TABLE accounts ADD COLUMN icon_code INTEGER;',
+          );
+          await db.execute(
+            'ALTER TABLE accounts ADD COLUMN custom_type TEXT;',
+          );
+        }
+        if (oldVersion < 4) {
+          await db.execute(
+            'ALTER TABLE accounts ADD COLUMN card_number TEXT;',
+          );
+          await db.execute(
+            'ALTER TABLE accounts ADD COLUMN billing_day INTEGER;',
+          );
+          await db.execute(
+            'ALTER TABLE accounts ADD COLUMN repayment_day INTEGER;',
+          );
+        }
+        if (oldVersion < 5) {
+          await db.execute(
+            'ALTER TABLE accounts ADD COLUMN nature TEXT NOT NULL DEFAULT "asset";',
           );
         }
       },
