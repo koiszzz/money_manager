@@ -77,8 +77,14 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
   void _appendAmount(String value) {
     setState(() {
       if (value == '.') {
-        if (_amountInput.contains('.')) return;
+        if (_amountInput.contains('.')) {
+          _amountInput = _amountValue.toStringAsFixed(0);
+        }
         _amountInput = _amountInput.isEmpty ? '0.' : '$_amountInput.';
+        return;
+      }
+      if (RegExp(r'^\d+\.\d{2}$').hasMatch(_amountInput)) {
+        // 已有两位小数，不能再输入数字
         return;
       }
       if (value == '00') {
@@ -103,6 +109,12 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
 
   void _toggleKeypad() {
     setState(() => _showKeypad = !_showKeypad);
+  }
+
+  void _clearAmount() {
+    setState(() {
+      _amountInput = '0';
+    });
   }
 
   Future<void> _pickDate() async {
@@ -194,7 +206,8 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                     child: Column(
                       children: [
                         Text(strings.amount,
@@ -227,62 +240,149 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                 strings: strings,
               ),
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(strings.category,
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const CategoriesTagsPage()),
-                      );
-                    },
-                    child: Text(strings.edit),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              _CategoryGrid(
-                categories: categories,
-                selectedId: _categoryId,
-                onSelected: (id) => setState(() => _categoryId = id),
-              ),
-              const SizedBox(height: 16),
+              if (_type != TransactionType.transfer) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(strings.category,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const CategoriesTagsPage()),
+                        );
+                      },
+                      child: Text(strings.more),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _CategoryGrid(
+                  categories: categories,
+                  selectedId: _categoryId,
+                  onSelected: (id) => setState(() => _categoryId = id),
+                ),
+                const SizedBox(height: 16),
+              ],
               Row(
                 children: [
                   Expanded(
-                    child: _DropdownField(
+                    child: _FormBox(
                       label: strings.account.toUpperCase(),
-                      value: _accountId,
-                      items: appState.accounts,
-                      onChanged: (id) => setState(() => _accountId = id),
+                      onTap: () async {
+                        final result = await showModalBottomSheet<String>(
+                          context: context,
+                          backgroundColor: const Color(0xFF16202A),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (_) {
+                            return ListView(
+                              shrinkWrap: true,
+                              children: appState.accounts.map((acc) {
+                                return ListTile(
+                                  title: Text(acc.name),
+                                  onTap: () => Navigator.pop(context, acc.id),
+                                );
+                              }).toList(),
+                            );
+                          },
+                        );
+
+                        if (result != null) {
+                          setState(() => _accountId = result);
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            appState.accounts
+                                    .firstWhere(
+                                      (e) => e.id == _accountId,
+                                      orElse: () => appState.accounts.first,
+                                    )
+                                    .name ??
+                                '',
+                          ),
+                          const Icon(Symbols.expand_more, size: 18),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _DateField(
+                    child: _FormBox(
                       label: strings.time.toUpperCase(),
-                      value: Formatters.dateLabel(_occurredAt, locale: locale),
                       onTap: _pickDate,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            Formatters.dateLabel(_occurredAt, locale: locale),
+                          ),
+                          const Icon(Symbols.calendar_month, size: 18),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
               if (_type == TransactionType.transfer) ...[
                 const SizedBox(height: 12),
-                _DropdownField(
+                _FormBox(
                   label: strings.account.toUpperCase(),
-                  value: _transferInAccountId,
-                  items: appState.accounts
-                      .where((acc) => acc.id != _accountId)
-                      .toList(),
-                  onChanged: (id) => setState(() => _transferInAccountId = id),
+                  onTap: () async {
+                    final accounts = appState.accounts
+                        .where((acc) => acc.id != _accountId)
+                        .toList();
+
+                    final result = await showModalBottomSheet<String>(
+                      context: context,
+                      backgroundColor: const Color(0xFF16202A),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
+                      ),
+                      builder: (_) {
+                        return ListView(
+                          shrinkWrap: true,
+                          children: accounts.map((acc) {
+                            return ListTile(
+                              title: Text(acc.name),
+                              onTap: () => Navigator.pop(context, acc.id),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    );
+
+                    if (result != null) {
+                      setState(() => _transferInAccountId = result);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _transferInAccountId == null
+                            ? AppLocalizations.of(context).select
+                            : appState.accounts
+                                .firstWhere((e) => e.id == _transferInAccountId)
+                                .name,
+                      ),
+                      const Icon(Symbols.expand_more, size: 18),
+                    ],
+                  ),
                 ),
               ],
               const SizedBox(height: 12),
               Text(strings.note.toUpperCase(),
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
               const SizedBox(height: 6),
               TextField(
                 controller: _noteController,
@@ -298,7 +398,8 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
               ),
               const SizedBox(height: 12),
               Text(strings.tags.toUpperCase(),
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -323,14 +424,16 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _canSave ? () => _save(keepAdding: true) : null,
+                      onPressed:
+                          _canSave ? () => _save(keepAdding: true) : null,
                       child: Text(strings.saveAndAdd),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _canSave ? () => _save(keepAdding: false) : null,
+                      onPressed:
+                          _canSave ? () => _save(keepAdding: false) : null,
                       child: Text(strings.save),
                     ),
                   ),
@@ -351,6 +454,7 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                       }
                     : null,
                 onHide: _toggleKeypad,
+                onClear: _clearAmount,
               ),
             ),
         ],
@@ -358,7 +462,8 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
     );
   }
 
-  Future<void> _showTagPicker(AppLocalizations strings, List<String> tags) async {
+  Future<void> _showTagPicker(
+      AppLocalizations strings, List<String> tags) async {
     final result = await showModalBottomSheet<List<String>>(
       context: context,
       backgroundColor: const Color(0xFF16202A),
@@ -476,34 +581,62 @@ class _CategoryGrid extends StatelessWidget {
         crossAxisCount: 4,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 0.9,
+        childAspectRatio: 1,
       ),
       itemCount: categories.length > 8 ? 8 : categories.length,
       itemBuilder: (context, index) {
         final cat = categories[index];
         final selected = cat.id == selectedId;
-        return InkWell(
-          onTap: () => onSelected(cat.id),
-          child: Column(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: selected
-                    ? AppTheme.primary
-                    : const Color(0xFF1B2632),
-                child: Icon(
-                  IconData(
-                    cat.icon == 0 ? Symbols.category.codePoint : cat.icon,
-                    fontFamily: 'MaterialSymbolsOutlined',
-                  ),
-                  color: selected ? Colors.white : AppTheme.textMuted,
-                  size: 18,
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            splashColor: AppTheme.primary.withValues(alpha: 0.15),
+            highlightColor: AppTheme.primary.withValues(alpha: 0.05),
+            onTap: () => onSelected(cat.id),
+            child: Ink(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: selected
+                    ? AppTheme.primary.withValues(alpha: 0.08)
+                    : Colors.transparent,
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor:
+                          selected ? AppTheme.primary : const Color(0xFF1B2632),
+                      child: Icon(
+                        IconData(
+                          cat.icon == 0 ? Symbols.category.codePoint : cat.icon,
+                          fontFamily: 'MaterialSymbolsOutlined',
+                          fontPackage: 'material_symbols_icons',
+                        ),
+                        color: selected ? Colors.white : AppTheme.textMuted,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      cat.name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight:
+                            selected ? FontWeight.w600 : FontWeight.w400,
+                        color: selected ? AppTheme.primary : AppTheme.textMuted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(cat.name,
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
-            ],
+            ),
           ),
         );
       },
@@ -511,93 +644,49 @@ class _CategoryGrid extends StatelessWidget {
   }
 }
 
-class _DropdownField extends StatelessWidget {
-  const _DropdownField({
+class _FormBox extends StatelessWidget {
+  const _FormBox({
     required this.label,
-    required this.value,
-    required this.items,
-    required this.onChanged,
+    required this.child,
+    this.onTap,
   });
 
   final String label;
-  final String? value;
-  final List<Account> items;
-  final ValueChanged<String> onChanged;
+  final Widget child;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
-          filled: true,
-          fillColor: const Color(0xFF141E2A),
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: value,
-            isExpanded: true,
-            isDense: true,
-            hint: Text(AppLocalizations.of(context).select),
-            items: items
-                .map(
-                  (acc) => DropdownMenuItem(
-                    value: acc.id,
-                    child: Text(acc.name),
-                  ),
-                )
-                .toList(),
-            onChanged: (id) {
-              if (id != null) onChanged(id);
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DateField extends StatelessWidget {
-  const _DateField({required this.label, required this.value, required this.onTap});
-
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      child: SizedBox(
+      child: Container(
         height: 56,
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
-            filled: true,
-            fillColor: const Color(0xFF141E2A),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF141E2A),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppTheme.textMuted,
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(value),
-              const Icon(Symbols.calendar_month, size: 18),
-            ],
-          ),
+            const SizedBox(height: 2),
+            DefaultTextStyle(
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+              child: child,
+            ),
+          ],
         ),
       ),
     );
@@ -627,88 +716,95 @@ class _TagAddChip extends StatelessWidget {
 }
 
 class _Keypad extends StatelessWidget {
+  final void Function(String) onKeyTap;
+  final VoidCallback onBackspace;
+  final VoidCallback? onSubmit;
+  final VoidCallback onHide;
+  final VoidCallback onClear;
+
   const _Keypad({
     required this.onKeyTap,
     required this.onBackspace,
     required this.onSubmit,
     required this.onHide,
+    required this.onClear,
   });
 
-  final ValueChanged<String> onKeyTap;
-  final VoidCallback onBackspace;
-  final VoidCallback? onSubmit;
-  final VoidCallback onHide;
+  static const double _rowHeight = 58;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(8, 6, 8, 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111A25),
-        borderRadius: BorderRadius.circular(16),
+    const dividerColor = Color(0xFF1F2A36);
+
+    return SizedBox(
+      height: _rowHeight * 4, // 固定总高度
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(8, 6, 8, 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF111A25),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            /// 左侧数字区
+            Expanded(
+              flex: 3,
+              child: Column(
+                children: [
+                  Expanded(child: _buildNumberRow(["7", "8", "9"])),
+                  Expanded(child: _buildNumberRow(["4", "5", "6"])),
+                  Expanded(child: _buildNumberRow(["1", "2", "3"])),
+                  Expanded(child: _buildNumberRow([".", "0", "00"])),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            /// 右侧功能区
+            Expanded(
+              flex: 1,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: _KeyCell(
+                      child: const Text("C"),
+                      onTap: onClear,
+                    ),
+                  ),
+                  Expanded(
+                    child: _KeyCell(
+                      child: const Icon(Icons.backspace_outlined, size: 20),
+                      onTap: onBackspace,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: _KeyCell(
+                      highlighted: true,
+                      child: const Icon(Icons.check, size: 22),
+                      onTap: onHide,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              const Spacer(),
-              IconButton(
-                onPressed: onHide,
-                icon: const Icon(Symbols.keyboard_hide, size: 18),
-              ),
-            ],
+    );
+  }
+
+  Widget _buildNumberRow(List<String> values) {
+    return Row(
+      children: values.map((v) {
+        return Expanded(
+          child: _KeyCell(
+            child: Text(v, style: const TextStyle(fontSize: 18)),
+            onTap: () => onKeyTap(v),
           ),
-          _KeyRow(
-            children: [
-              _KeyButton(child: const Text('1'), onTap: () => onKeyTap('1')),
-              _KeyButton(child: const Text('2'), onTap: () => onKeyTap('2')),
-              _KeyButton(child: const Text('3'), onTap: () => onKeyTap('3')),
-              _KeyButton(
-                child: const Icon(Symbols.backspace, size: 20),
-                onTap: onBackspace,
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          _KeyRow(
-            children: [
-              _KeyButton(child: const Text('4'), onTap: () => onKeyTap('4')),
-              _KeyButton(child: const Text('5'), onTap: () => onKeyTap('5')),
-              _KeyButton(child: const Text('6'), onTap: () => onKeyTap('6')),
-              _KeyButton(
-                child: const Text('C'),
-                onTap: onBackspace,
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          _KeyRow(
-            children: [
-              _KeyButton(child: const Text('7'), onTap: () => onKeyTap('7')),
-              _KeyButton(child: const Text('8'), onTap: () => onKeyTap('8')),
-              _KeyButton(child: const Text('9'), onTap: () => onKeyTap('9')),
-              const SizedBox.shrink(),
-            ],
-          ),
-          const SizedBox(height: 6),
-          _KeyRow(
-            children: [
-              _KeyButton(child: const Text('.'), onTap: () => onKeyTap('.')),
-              _KeyButton(child: const Text('0'), onTap: () => onKeyTap('0')),
-              _KeyButton(child: const Text('00'), onTap: () => onKeyTap('00')),
-              Expanded(
-                flex: 1,
-                child: _KeyButton(
-                  child: const Icon(Symbols.check, size: 20),
-                  onTap: onSubmit,
-                  highlighted: true,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      }).toList(),
     );
   }
 }
@@ -724,40 +820,38 @@ class _KeyRow extends StatelessWidget {
       height: 58,
       child: Row(
         children: children.map((child) {
-          return child is Expanded ? child : Expanded(child: child);
+          return Expanded(child: child);
         }).toList(),
       ),
     );
   }
 }
 
-class _KeyButton extends StatelessWidget {
-  const _KeyButton({
+class _KeyCell extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  final bool highlighted;
+
+  const _KeyCell({
     required this.child,
     required this.onTap,
     this.highlighted = false,
   });
 
-  final Widget child;
-  final VoidCallback? onTap;
-  final bool highlighted;
-
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: highlighted ? AppTheme.primary : const Color(0xFF141E2A),
-      child: InkWell(
-        onTap: onTap,
-        child: Center(
-          child: DefaultTextStyle(
-            style: TextStyle(
-              color: highlighted ? Colors.white : Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-            child: child,
-          ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        alignment: Alignment.center,
+        margin: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color:
+              highlighted ? const Color(0xFF00C853) : const Color(0xFF1B2633),
+          borderRadius: BorderRadius.circular(12),
         ),
+        child: child,
       ),
     );
   }
@@ -800,7 +894,8 @@ class _TagPickerSheetState extends State<_TagPickerSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(widget.title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -834,8 +929,7 @@ class _TagPickerSheetState extends State<_TagPickerSheet> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () =>
-                      Navigator.of(context).pop(_current.toList()),
+                  onPressed: () => Navigator.of(context).pop(_current.toList()),
                   child: Text(widget.confirmLabel),
                 ),
               ),

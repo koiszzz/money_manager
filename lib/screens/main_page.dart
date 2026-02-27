@@ -22,11 +22,11 @@ class MainPage extends StatelessWidget {
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    final pages = const [
-      DashboardPage(),
-      TransactionsPage(),
-      ReportsPage(),
-      SettingsPage(),
+    final pages = [
+      const DashboardPage(),
+      const TransactionsPage(),
+      const ReportsPage(),
+      const SettingsPage(),
     ];
 
     final strings = AppLocalizations.of(context);
@@ -46,7 +46,7 @@ class MainPage extends StatelessWidget {
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             children: [
               _NavItem(

@@ -169,15 +169,19 @@ class AppLocalizations {
       'account_migration': 'Account Migration',
       'account_migration_desc': 'Move historical bills to another account',
       'account_delete_blocked_title': 'Cannot delete',
-      'account_delete_blocked_body': 'This account has transactions. Migrate or disable it first.',
+      'account_delete_blocked_body':
+          'This account has transactions. Migrate or disable it first.',
       'migration_title': 'Move account data',
-      'migration_subtitle': 'Select source and destination accounts to transfer history.',
+      'migration_subtitle':
+          'Select source and destination accounts to transfer history.',
       'migration_source': 'Source Account',
       'migration_target': 'Target Account',
       'migration_summary': 'Migration Summary',
-      'migration_warning': 'Once migrated, transactions cannot be automatically restored to the original account.',
+      'migration_warning':
+          'Once migrated, transactions cannot be automatically restored to the original account.',
       'migration_help_title': 'Migration Help',
-      'migration_help_body': 'Choose a source and target account. Review counts before confirming.',
+      'migration_help_body':
+          'Choose a source and target account. Review counts before confirming.',
       'migration_confirm_body': 'Migration is irreversible. Continue?',
       'migration_done': 'Migration complete',
       'start_migration': 'Start Migration',
@@ -205,7 +209,8 @@ class AppLocalizations {
       'pending_confirm': 'Pending Confirmation',
       'no_recurring': 'No recurring tasks yet',
       'add_recurring': 'Add recurring task',
-      'recurring_placeholder': 'Recurring task creation is available in the next step.',
+      'recurring_placeholder':
+          'Recurring task creation is available in the next step.',
       'recurring_task': 'Recurring task',
       'alerts_reminders': 'Alerts & Reminders',
       'daily_reminders': 'Daily Reminders',
@@ -236,7 +241,8 @@ class AppLocalizations {
       'next_scheduled': 'Next Scheduled',
       'backup_next_time': 'Tomorrow, 3:00 AM',
       'quick_actions': 'Quick Actions',
-      'backup_format_info': 'Import files must be .json or .csv. Encrypted backups require a password.',
+      'backup_format_info':
+          'Import files must be .json or .csv. Encrypted backups require a password.',
       'local_backups': 'Local Backups',
       'backup_footer': 'Backups are stored locally on your device.',
       'backup_restore_subtitle': 'Export & import local files',
@@ -255,7 +261,8 @@ class AppLocalizations {
       'security_privacy': 'Security & Privacy',
       'security_privacy_subtitle': 'PIN, biometrics, privacy',
       'security_hero_title': 'Protect your account',
-      'security_hero_subtitle': 'Manage security preferences and privacy settings.',
+      'security_hero_subtitle':
+          'Manage security preferences and privacy settings.',
       'security_level': 'Security Level',
       'security_level_high': 'High',
       'app_access': 'App Access',
@@ -267,7 +274,8 @@ class AppLocalizations {
       'legal_info': 'Legal & Info',
       'privacy_policy': 'Privacy Policy',
       'terms_of_service': 'Terms of Service',
-      'offline_policy_note': 'This is an offline app. Policy content is stored locally.',
+      'offline_policy_note':
+          'This is an offline app. Policy content is stored locally.',
       'storage_cleanup': 'Storage & Data',
       'storage_cleanup_subtitle': 'Cache and data cleanup',
       'storage_details': 'Details',
@@ -288,6 +296,7 @@ class AppLocalizations {
       'version_value': 'Final V1 (offline)',
       'release_notes_value': 'Core offline ledger features.',
       'copy_diagnostics': 'Copy diagnostic info',
+      'more': 'More',
     },
     'zh_CN': {
       'app_title': '记账助手',
@@ -562,6 +571,7 @@ class AppLocalizations {
       'version_value': 'Final V1（离线版）',
       'release_notes_value': '完整离线记账能力。',
       'copy_diagnostics': '复制诊断信息',
+      'more': '更多',
     },
   };
 
@@ -724,7 +734,8 @@ class AppLocalizations {
   String get emptyAccounts => _value('empty_accounts');
   String get accountMigration => _value('account_migration');
   String get accountMigrationDesc => _value('account_migration_desc');
-  String get accountDeleteBlockedTitle => _value('account_delete_blocked_title');
+  String get accountDeleteBlockedTitle =>
+      _value('account_delete_blocked_title');
   String get accountDeleteBlockedBody => _value('account_delete_blocked_body');
   String get migrationTitle => _value('migration_title');
   String get migrationSubtitle => _value('migration_subtitle');
@@ -843,6 +854,7 @@ class AppLocalizations {
   String get versionValue => _value('version_value');
   String get releaseNotesValue => _value('release_notes_value');
   String get copyDiagnostics => _value('copy_diagnostics');
+  String get more => _value('more');
 
   String migrationSummaryBody(int count, String source, String target) {
     if (locale.languageCode == 'zh') {

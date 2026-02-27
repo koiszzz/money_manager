@@ -38,7 +38,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
     final strings = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final month = appState.currentMonth;
-    final records = appState.filteredRecords(month)
+    final records = appState
+        .filteredRecords(month)
         .where((record) => _matchSearch(appState, record))
         .toList();
 
@@ -51,7 +52,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
             searchHint: strings.searchHint,
             onMoreTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AddEditTransactionPage()),
+                MaterialPageRoute(
+                    builder: (_) => const AddEditTransactionPage()),
               );
             },
           ),
@@ -78,9 +80,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     itemCount: records.length,
                     itemBuilder: (context, index) {
                       final record = records[index];
-                      final groupLabel = _groupLabel(strings, record.occurredAt);
+                      final groupLabel =
+                          _groupLabel(strings, record.occurredAt);
                       final showHeader = index == 0 ||
-                          _groupLabel(strings, records[index - 1].occurredAt) != groupLabel;
+                          _groupLabel(strings, records[index - 1].occurredAt) !=
+                              groupLabel;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -260,7 +264,8 @@ class _FilterChips extends StatelessWidget {
 }
 
 class _Chip extends StatelessWidget {
-  const _Chip({required this.label, required this.selected, required this.onTap});
+  const _Chip(
+      {required this.label, required this.selected, required this.onTap});
 
   final String label;
   final bool selected;
@@ -268,7 +273,6 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppTheme.primary : const Color(0xFF1F2A36);
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ChoiceChip(
@@ -436,7 +440,9 @@ class _TransactionTile extends StatelessWidget {
             style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
         trailing: Text(
           Formatters.money(
-            record.type == TransactionType.expense ? -record.amount : record.amount,
+            record.type == TransactionType.expense
+                ? -record.amount
+                : record.amount,
             showSign: record.type != TransactionType.transfer,
             locale: locale,
             currencyCode: currencyCode,
