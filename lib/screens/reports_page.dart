@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +23,8 @@ class _ReportsPageState extends State<ReportsPage> {
   late DateTime _selectedMonth;
   late int _selectedYear;
   DateTimeRange? _customRange;
+  int? _expenseTouchedIndex;
+  int? _incomeTouchedIndex;
 
   @override
   void initState() {
@@ -99,13 +102,13 @@ class _ReportsPageState extends State<ReportsPage> {
                 if (expenseSegments.isEmpty)
                   _EmptyChart(label: strings.noData)
                 else
-                  _InteractiveDonutChart(
+                  _DonutChart(
                     segments: expenseSegments,
                     centerLabel: strings.typeExpense,
-                    onSegmentTap: (segment) {
-                      _showAmount(context, segment.label, segment.value, appState,
-                          locale);
-                    },
+                    touchedIndex: _expenseTouchedIndex,
+                    onTouched: (index) => setState(() {
+                      _expenseTouchedIndex = index;
+                    }),
                   ),
                 const SizedBox(height: 12),
                 _LegendGrid(
@@ -113,8 +116,6 @@ class _ReportsPageState extends State<ReportsPage> {
                   locale: locale,
                   currencyCode: appState.currencyCode,
                   decimalDigits: appState.decimalPlaces,
-                  onTap: (segment) => _showAmount(
-                      context, segment.label, segment.value, appState, locale),
                 ),
               ],
             ),
@@ -130,13 +131,13 @@ class _ReportsPageState extends State<ReportsPage> {
                 if (incomeSegments.isEmpty)
                   _EmptyChart(label: strings.noData)
                 else
-                  _InteractiveDonutChart(
+                  _DonutChart(
                     segments: incomeSegments,
                     centerLabel: strings.typeIncome,
-                    onSegmentTap: (segment) {
-                      _showAmount(context, segment.label, segment.value, appState,
-                          locale);
-                    },
+                    touchedIndex: _incomeTouchedIndex,
+                    onTouched: (index) => setState(() {
+                      _incomeTouchedIndex = index;
+                    }),
                   ),
                 const SizedBox(height: 12),
                 _LegendGrid(
@@ -144,8 +145,6 @@ class _ReportsPageState extends State<ReportsPage> {
                   locale: locale,
                   currencyCode: appState.currencyCode,
                   decimalDigits: appState.decimalPlaces,
-                  onTap: (segment) => _showAmount(
-                      context, segment.label, segment.value, appState, locale),
                 ),
               ],
             ),
@@ -161,10 +160,7 @@ class _ReportsPageState extends State<ReportsPage> {
                 if (trend.points.isEmpty)
                   _EmptyChart(label: strings.noData)
                 else
-                  _TrendChart(
-                    trend: trend,
-                    strings: strings,
-                  ),
+                  _TrendChart(trend: trend, strings: strings),
               ],
             ),
           ),
@@ -295,6 +291,7 @@ class _ReportsPageState extends State<ReportsPage> {
     final bucketCount = isYear ? 12 : days;
     final income = List<double>.filled(bucketCount, 0);
     final expense = List<double>.filled(bucketCount, 0);
+    final labels = List<String>.filled(bucketCount, '');
 
     for (final record in records) {
       if (record.type == TransactionType.transfer) continue;
@@ -311,6 +308,18 @@ class _ReportsPageState extends State<ReportsPage> {
       }
     }
 
+    if (isYear) {
+      for (var i = 0; i < bucketCount; i++) {
+        labels[i] = '${i + 1}';
+      }
+    } else {
+      for (var i = 0; i < bucketCount; i++) {
+        final day = DateTime(range.start.year, range.start.month, range.start.day)
+            .add(Duration(days: i));
+        labels[i] = day.day.toString();
+      }
+    }
+
     final net = List<double>.filled(bucketCount, 0);
     double running = 0;
     for (var i = 0; i < bucketCount; i++) {
@@ -323,6 +332,7 @@ class _ReportsPageState extends State<ReportsPage> {
       income: income,
       expense: expense,
       net: net,
+      labels: labels,
     );
   }
 
@@ -372,23 +382,6 @@ class _ReportsPageState extends State<ReportsPage> {
     }
   }
 
-  void _showAmount(
-    BuildContext context,
-    String label,
-    double value,
-    AppState appState,
-    String locale,
-  ) {
-    final amount = Formatters.money(
-      value,
-      locale: locale,
-      currencyCode: appState.currencyCode,
-      decimalDigits: appState.decimalPlaces,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label：$amount')),
-    );
-  }
 }
 
 enum ReportRange { month, year, custom }
@@ -559,95 +552,71 @@ class _PieSegment {
   final Color color;
 }
 
-class _InteractiveDonutChart extends StatefulWidget {
-  const _InteractiveDonutChart({
+class _DonutChart extends StatelessWidget {
+  const _DonutChart({
     required this.segments,
     required this.centerLabel,
-    required this.onSegmentTap,
+    required this.touchedIndex,
+    required this.onTouched,
   });
 
   final List<_PieSegment> segments;
   final String centerLabel;
-  final ValueChanged<_PieSegment> onSegmentTap;
+  final int? touchedIndex;
+  final ValueChanged<int?> onTouched;
 
-  @override
-  State<_InteractiveDonutChart> createState() => _InteractiveDonutChartState();
-}
-
-class _InteractiveDonutChartState extends State<_InteractiveDonutChart> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (details) {
-        final box = context.findRenderObject() as RenderBox?;
-        if (box == null) return;
-        final local = box.globalToLocal(details.globalPosition);
-        final center = Offset(box.size.width / 2, 70);
-        final dx = local.dx - center.dx;
-        final dy = local.dy - center.dy;
-        final radius = sqrt(dx * dx + dy * dy);
-        if (radius < 34 || radius > 70) return;
-        final angle = (atan2(dy, dx) + pi / 2 + 2 * pi) % (2 * pi);
-        final total =
-            widget.segments.fold<double>(0, (sum, item) => sum + item.value);
-        if (total <= 0) return;
-        double start = 0;
-        for (final seg in widget.segments) {
-          final sweep = (seg.value / total) * 2 * pi;
-          if (angle >= start && angle <= start + sweep) {
-            widget.onSegmentTap(seg);
-            return;
-          }
-          start += sweep;
-        }
-      },
-      child: SizedBox(
-        height: 170,
-        child: CustomPaint(
-          painter: _DonutPainter(segments: widget.segments),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(widget.centerLabel,
-                    style: const TextStyle(
-                        color: AppTheme.textMuted, fontSize: 12)),
-              ],
-            ),
+    return SizedBox(
+      height: 180,
+      child: PieChart(
+        PieChartData(
+          sectionsSpace: 2,
+          centerSpaceRadius: 42,
+          startDegreeOffset: -90,
+          sections: [
+            for (var i = 0; i < segments.length; i++)
+              _pieSection(segments[i], i == touchedIndex),
+          ],
+          pieTouchData: PieTouchData(
+            touchCallback: (event, response) {
+              if (!event.isInterestedForInteractions ||
+                  response == null ||
+                  response.touchedSection == null) {
+                onTouched(null);
+                return;
+              }
+              final index = response.touchedSection!.touchedSectionIndex;
+              onTouched(index);
+            },
           ),
         ),
       ),
     );
   }
-}
 
-class _DonutPainter extends CustomPainter {
-  _DonutPainter({required this.segments});
-
-  final List<_PieSegment> segments;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final total = segments.fold<double>(0, (sum, item) => sum + item.value);
-    final center = Offset(size.width / 2, 70);
-    final rect = Rect.fromCircle(center: center, radius: 70);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 16
-      ..strokeCap = StrokeCap.round;
-    double start = -pi / 2;
-    for (final seg in segments) {
-      if (total <= 0) break;
-      final sweep = (seg.value / total) * 2 * pi;
-      paint.color = seg.color;
-      canvas.drawArc(rect, start, sweep, false, paint);
-      start += sweep;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DonutPainter oldDelegate) {
-    return oldDelegate.segments != segments;
+  PieChartSectionData _pieSection(_PieSegment segment, bool highlighted) {
+    return PieChartSectionData(
+      color: segment.color,
+      value: segment.value,
+      radius: highlighted ? 72 : 62,
+      showTitle: false,
+      badgeWidget: highlighted
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF111A25),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: segment.color.withOpacity(0.6)),
+              ),
+              child: Text(
+                segment.label,
+                style: const TextStyle(fontSize: 11),
+              ),
+            )
+          : null,
+      badgePositionPercentageOffset: 1.2,
+    );
   }
 }
 
@@ -657,14 +626,12 @@ class _LegendGrid extends StatelessWidget {
     required this.locale,
     required this.currencyCode,
     required this.decimalDigits,
-    required this.onTap,
   });
 
   final List<_PieSegment> segments;
   final String locale;
   final String currencyCode;
   final int decimalDigits;
-  final ValueChanged<_PieSegment> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -673,40 +640,36 @@ class _LegendGrid extends StatelessWidget {
       spacing: 12,
       runSpacing: 8,
       children: segments.map((seg) {
-        return InkWell(
-          onTap: () => onTap(seg),
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF141E2A),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration:
-                      BoxDecoration(color: seg.color, shape: BoxShape.circle),
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF141E2A),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration:
+                    BoxDecoration(color: seg.color, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 6),
+              Text(seg.label,
+                  style: const TextStyle(
+                      color: AppTheme.textMuted, fontSize: 12)),
+              const SizedBox(width: 6),
+              Text(
+                Formatters.money(
+                  seg.value,
+                  locale: locale,
+                  currencyCode: currencyCode,
+                  decimalDigits: decimalDigits,
                 ),
-                const SizedBox(width: 6),
-                Text(seg.label,
-                    style: const TextStyle(
-                        color: AppTheme.textMuted, fontSize: 12)),
-                const SizedBox(width: 6),
-                Text(
-                  Formatters.money(
-                    seg.value,
-                    locale: locale,
-                    currencyCode: currencyCode,
-                    decimalDigits: decimalDigits,
-                  ),
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
-            ),
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
           ),
         );
       }).toList(),
@@ -720,12 +683,14 @@ class _TrendSeries {
     required this.income,
     required this.expense,
     required this.net,
+    required this.labels,
   });
 
   final List<double> points;
   final List<double> income;
   final List<double> expense;
   final List<double> net;
+  final List<String> labels;
 }
 
 class _TrendChart extends StatelessWidget {
@@ -736,13 +701,88 @@ class _TrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spotsIncome =
+        List.generate(trend.income.length, (i) => FlSpot(i.toDouble(), trend.income[i]));
+    final spotsExpense =
+        List.generate(trend.expense.length, (i) => FlSpot(i.toDouble(), trend.expense[i]));
+    final spotsNet =
+        List.generate(trend.net.length, (i) => FlSpot(i.toDouble(), trend.net[i]));
+    final allValues = [...trend.income, ...trend.expense, ...trend.net];
+    final minValue = allValues.isEmpty ? 0.0 : allValues.reduce(min);
+    final maxValue = allValues.isEmpty ? 0.0 : allValues.reduce(max);
+    final padding = (maxValue - minValue) * 0.1;
+    final minY = minValue - padding;
+    final maxY = maxValue + padding;
+
     return Column(
       children: [
         SizedBox(
-          height: 160,
-          child: CustomPaint(
-            painter: _TrendPainter(trend: trend),
-            child: Container(),
+          height: 180,
+          child: LineChart(
+            LineChartData(
+              minY: minY,
+              maxY: maxY,
+              gridData: FlGridData(show: true, drawVerticalLine: false),
+              titlesData: FlTitlesData(
+                leftTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: _labelInterval(trend.labels.length),
+                    reservedSize: 22,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.round();
+                      if (index < 0 || index >= trend.labels.length) {
+                        return const SizedBox.shrink();
+                      }
+                      return SideTitleWidget(
+                        axisSide: meta.axisSide,
+                        child: Text(
+                          trend.labels[index],
+                          style: const TextStyle(
+                            color: AppTheme.textMuted,
+                            fontSize: 10,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              borderData: FlBorderData(show: false),
+              lineTouchData: LineTouchData(
+                handleBuiltInTouches: true,
+                touchTooltipData: LineTouchTooltipData(
+                  tooltipBgColor: const Color(0xFF111A25),
+                  getTooltipItems: (touched) {
+                    return touched.map((item) {
+                      final label = item.barIndex == 0
+                          ? strings.trendIncome
+                          : item.barIndex == 1
+                              ? strings.trendExpense
+                              : strings.trendNet;
+                      return LineTooltipItem(
+                        '$label: ${item.y.toStringAsFixed(2)}',
+                        const TextStyle(color: Colors.white, fontSize: 11),
+                      );
+                    }).toList();
+                  },
+                ),
+              ),
+              lineBarsData: [
+                _line(spotsIncome, const Color(0xFF34D399)),
+                _line(spotsExpense, const Color(0xFFF87171)),
+                _line(spotsNet, const Color(0xFF60A5FA)),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -759,62 +799,24 @@ class _TrendChart extends StatelessWidget {
       ],
     );
   }
+
+  LineChartBarData _line(List<FlSpot> spots, Color color) {
+    return LineChartBarData(
+      spots: spots,
+      isCurved: true,
+      color: color,
+      barWidth: 2,
+      dotData: FlDotData(show: false),
+      belowBarData: BarAreaData(show: false),
+    );
+  }
 }
 
-class _TrendPainter extends CustomPainter {
-  _TrendPainter({required this.trend});
-
-  final _TrendSeries trend;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final maxValue = [
-      ...trend.income.map((e) => e.abs()),
-      ...trend.expense.map((e) => e.abs()),
-      ...trend.net.map((e) => e.abs()),
-    ].fold<double>(0, max);
-    final scale = maxValue <= 0 ? 1.0 : maxValue;
-
-    final padding = 12.0;
-    final width = size.width - padding * 2;
-    final height = size.height - padding * 2;
-    final count = trend.points.length;
-    if (count <= 1) return;
-
-    final dx = width / (count - 1);
-
-    Offset pointFor(List<double> data, int i) {
-      final x = padding + dx * i;
-      final y = padding + height - (data[i] / scale) * height;
-      return Offset(x, y);
-    }
-
-    void drawLine(List<double> data, Color color) {
-      final path = Path();
-      for (var i = 0; i < data.length; i++) {
-        final p = pointFor(data, i);
-        if (i == 0) {
-          path.moveTo(p.dx, p.dy);
-        } else {
-          path.lineTo(p.dx, p.dy);
-        }
-      }
-      final paint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..color = color;
-      canvas.drawPath(path, paint);
-    }
-
-    drawLine(trend.income, const Color(0xFF34D399));
-    drawLine(trend.expense, const Color(0xFFF87171));
-    drawLine(trend.net, const Color(0xFF60A5FA));
-  }
-
-  @override
-  bool shouldRepaint(covariant _TrendPainter oldDelegate) {
-    return oldDelegate.trend != trend;
-  }
+double _labelInterval(int count) {
+  if (count <= 5) return 1;
+  if (count <= 8) return 2;
+  if (count <= 12) return 3;
+  return max(1, (count / 6).ceilToDouble());
 }
 
 class _LegendDot extends StatelessWidget {
