@@ -196,7 +196,8 @@ class AppLocalizations {
       'billing_day_hint': '1-31',
       'repayment_day': 'Repayment Day',
       'repayment_day_hint': '1-31',
-      'migration_type_mismatch': 'Only accounts of the same type can be merged.',
+      'migration_type_mismatch':
+          'Only accounts of the same type can be merged.',
       'migration_history_title': 'Migration History',
       'migration_history_empty': 'No migration history yet',
       'empty_accounts': 'No accounts yet',
@@ -253,8 +254,19 @@ class AppLocalizations {
       'system_permissions': 'System Permissions',
       'status_enabled': 'Status: Enabled',
       'status_disabled': 'Status: Disabled',
+      'test_notification': 'Test Notification',
+      'test_notification_desc': 'Verify notifications can be received now',
+      'send_now': 'Send Now',
+      'test_notification_body':
+          'This is a test notification from Money Manager.',
+      'test_notification_sent': 'Test notification sent.',
+      'test_notification_blocked_dnd':
+          'Current time is in Do Not Disturb period.',
+      'enable_system_notification_first': 'Enable system notifications first.',
       'dnd_title': 'Do Not Disturb',
       'dnd_subtitle': 'Mute notifications during sleep',
+      'reminder_dnd_conflict':
+          'Reminder time conflicts with Do Not Disturb period.',
       'from': 'From',
       'to': 'To',
       'appearance_label': 'Appearance',
@@ -565,8 +577,16 @@ class AppLocalizations {
       'system_permissions': '系统通知权限',
       'status_enabled': '状态：已开启',
       'status_disabled': '状态：未开启',
+      'test_notification': '测试通知',
+      'test_notification_desc': '立即验证当前设备是否能收到通知',
+      'send_now': '立即发送',
+      'test_notification_body': '这是一条来自记账助手的测试通知。',
+      'test_notification_sent': '测试通知已发送。',
+      'test_notification_blocked_dnd': '当前时间处于免打扰时段，已拦截发送。',
+      'enable_system_notification_first': '请先开启系统通知开关。',
       'dnd_title': '免打扰',
       'dnd_subtitle': '睡眠时段不打扰',
+      'reminder_dnd_conflict': '提醒时间与免打扰时段冲突，请先调整时间。',
       'from': '从',
       'to': '到',
       'appearance_label': '外观',
@@ -845,6 +865,7 @@ class AppLocalizations {
     }
     return '$date: $source → $target ($count)';
   }
+
   String get emptyAccounts => _value('empty_accounts');
   String get accountMigration => _value('account_migration');
   String get accountMigrationDesc => _value('account_migration_desc');
@@ -895,8 +916,18 @@ class AppLocalizations {
   String get systemPermissions => _value('system_permissions');
   String get statusEnabled => _value('status_enabled');
   String get statusDisabled => _value('status_disabled');
+  String get testNotification => _value('test_notification');
+  String get testNotificationDesc => _value('test_notification_desc');
+  String get sendNow => _value('send_now');
+  String get testNotificationBody => _value('test_notification_body');
+  String get testNotificationSent => _value('test_notification_sent');
+  String get testNotificationBlockedByDnd =>
+      _value('test_notification_blocked_dnd');
+  String get enableSystemNotificationFirst =>
+      _value('enable_system_notification_first');
   String get dndTitle => _value('dnd_title');
   String get dndSubtitle => _value('dnd_subtitle');
+  String get reminderDndConflict => _value('reminder_dnd_conflict');
   String get from => _value('from');
   String get to => _value('to');
   String get appearanceLabel => _value('appearance_label');

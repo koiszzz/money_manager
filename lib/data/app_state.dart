@@ -9,6 +9,7 @@ import 'package:sqflite/sqflite.dart';
 import 'app_database.dart';
 import 'models.dart';
 import 'sample_data.dart';
+import '../services/reminder_service.dart';
 
 class AppState extends ChangeNotifier {
   AppState() {
@@ -29,7 +30,8 @@ class AppState extends ChangeNotifier {
 
   bool _initialized = false;
   int _tabIndex = 0;
-  DateTime _currentMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  DateTime _currentMonth =
+      DateTime(DateTime.now().year, DateTime.now().month, 1);
   TransactionType? _transactionsFilterType;
 
   List<TransactionRecord> get records => List.unmodifiable(_records);
@@ -37,8 +39,7 @@ class AppState extends ChangeNotifier {
   List<Category> get categories => List.unmodifiable(_categories);
   List<Budget> get budgets => List.unmodifiable(_budgets);
   List<RecurringTask> get recurringTasks => List.unmodifiable(_recurringTasks);
-  List<AccountTypeOption> get accountTypes =>
-      List.unmodifiable(_accountTypes);
+  List<AccountTypeOption> get accountTypes => List.unmodifiable(_accountTypes);
   List<String> get tags => List.unmodifiable(_tags);
 
   bool get initialized => _initialized;
@@ -49,19 +50,30 @@ class AppState extends ChangeNotifier {
   String get pinCode => _settings['pin_code'] ?? '1234';
   String get currencyCode => _settings['currency'] ?? 'CNY';
   String get themeMode => _settings['theme_mode'] ?? 'dark';
-  String get reminderTime => _settings['reminder_time'] ?? '20:00';
+  String get reminderTime => ReminderService.toCanonicalTime(
+        _settings['reminder_time'] ?? ReminderService.defaultReminderTime,
+        fallback: ReminderService.defaultReminderTime,
+      );
   bool get budgetWarningEnabled => _settings['budget_warning'] == '1';
   bool get recurringReminderEnabled => _settings['recurring_reminder'] == '1';
   bool get dailyReminderEnabled => _settings['daily_reminder'] == '1';
   bool get systemNotificationsEnabled =>
       _settings['system_notifications'] != '0';
   bool get dndEnabled => _settings['dnd_enabled'] == '1';
-  String get dndFrom => _settings['dnd_from'] ?? '22:00';
-  String get dndTo => _settings['dnd_to'] ?? '07:00';
+  String get dndFrom => ReminderService.toCanonicalTime(
+        _settings['dnd_from'] ?? ReminderService.defaultDndFrom,
+        fallback: ReminderService.defaultDndFrom,
+      );
+  String get dndTo => ReminderService.toCanonicalTime(
+        _settings['dnd_to'] ?? ReminderService.defaultDndTo,
+        fallback: ReminderService.defaultDndTo,
+      );
+  String? get budgetWarningLastSentKey => _settings['budget_warning_last_sent'];
   bool get biometricEnabled => _settings['biometric_unlock'] == '1';
   bool get screenshotProtectionEnabled =>
       _settings['screenshot_protection'] == '1';
-  int get decimalPlaces => int.tryParse(_settings['decimal_places'] ?? '2') ?? 2;
+  int get decimalPlaces =>
+      int.tryParse(_settings['decimal_places'] ?? '2') ?? 2;
   String get weekStartsOn => _settings['week_start'] ?? 'Monday';
   String get appLanguage => _settings['app_language'] ?? 'system';
   double get fontScale =>
@@ -116,7 +128,13 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> updateReminderTime(String time) async {
-    await _setSetting('reminder_time', time);
+    await _setSetting(
+      'reminder_time',
+      ReminderService.toCanonicalTime(
+        time,
+        fallback: ReminderService.defaultReminderTime,
+      ),
+    );
   }
 
   Future<void> toggleDailyReminder(bool enabled) async {
@@ -140,11 +158,66 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> updateDndFrom(String time) async {
-    await _setSetting('dnd_from', time);
+    await _setSetting(
+      'dnd_from',
+      ReminderService.toCanonicalTime(
+        time,
+        fallback: ReminderService.defaultDndFrom,
+      ),
+    );
   }
 
   Future<void> updateDndTo(String time) async {
-    await _setSetting('dnd_to', time);
+    await _setSetting(
+      'dnd_to',
+      ReminderService.toCanonicalTime(
+        time,
+        fallback: ReminderService.defaultDndTo,
+      ),
+    );
+  }
+
+  Future<void> updateBudgetWarningLastSentKey(String key) async {
+    await _setSetting('budget_warning_last_sent', key);
+  }
+
+  bool reminderConflictsWithDnd({
+    String? reminder,
+    String? from,
+    String? to,
+    bool? dnd,
+  }) {
+    return ReminderService.hasReminderDndConflict(
+      dndEnabled: dnd ?? dndEnabled,
+      reminderTime: reminder ?? reminderTime,
+      dndFrom: from ?? dndFrom,
+      dndTo: to ?? dndTo,
+    );
+  }
+
+  List<ReminderSignal> dueReminderSignals({
+    DateTime? now,
+    Duration recurringLookAhead = const Duration(hours: 24),
+  }) {
+    final current = now ?? DateTime.now();
+    final month = DateTime(current.year, current.month, 1);
+    final budget = budgetForMonth(month);
+    final ratio = budgetUsageRatio(month);
+    return ReminderService.collectDueSignals(
+      now: current,
+      systemNotificationsEnabled: systemNotificationsEnabled,
+      dailyReminderEnabled: dailyReminderEnabled,
+      reminderTime: reminderTime,
+      dndEnabled: dndEnabled,
+      dndFrom: dndFrom,
+      dndTo: dndTo,
+      budgetWarningEnabled: budgetWarningEnabled,
+      budgetUsageRatio: ratio,
+      budgetWarningThreshold: budget.warningThreshold,
+      recurringReminderEnabled: recurringReminderEnabled,
+      recurringTasks: recurringTasks,
+      recurringLookAhead: recurringLookAhead,
+    );
   }
 
   Future<void> toggleBiometric(bool enabled) async {
@@ -254,10 +327,10 @@ class AppState extends ChangeNotifier {
     await _setSetting('tags', jsonEncode(_tags));
   }
 
-  Future<void> addCategory(CategoryType type, String name, int icon, int color) async {
-    final maxOrder = _categories
-        .where((c) => c.type == type)
-        .fold<int>(-1, (max, item) => item.sortOrder > max ? item.sortOrder : max);
+  Future<void> addCategory(
+      CategoryType type, String name, int icon, int color) async {
+    final maxOrder = _categories.where((c) => c.type == type).fold<int>(
+        -1, (max, item) => item.sortOrder > max ? item.sortOrder : max);
     final category = Category(
       id: _uuid.v4(),
       type: type,
@@ -284,9 +357,8 @@ class AppState extends ChangeNotifier {
     int? repaymentDay,
   }) async {
     final accountType = _mapNatureToAccountType(nature);
-    final maxOrder = _accounts
-        .where((a) => a.nature == nature)
-        .fold<int>(-1, (max, item) => item.sortOrder > max ? item.sortOrder : max);
+    final maxOrder = _accounts.where((a) => a.nature == nature).fold<int>(
+        -1, (max, item) => item.sortOrder > max ? item.sortOrder : max);
     final account = Account(
       id: _uuid.v4(),
       name: name,
@@ -368,9 +440,7 @@ class AppState extends ChangeNotifier {
 
   int countRecordsForAccount(String accountId) {
     return _records.where((r) => r.accountId == accountId).length +
-        _records
-            .where((r) => r.transferInAccountId == accountId)
-            .length;
+        _records.where((r) => r.transferInAccountId == accountId).length;
   }
 
   Future<bool> deleteAccount(String accountId) async {
@@ -523,7 +593,8 @@ class AppState extends ChangeNotifier {
     await _db.insert('settings', {'key': 'dnd_from', 'value': '22:00'});
     await _db.insert('settings', {'key': 'dnd_to', 'value': '07:00'});
     await _db.insert('settings', {'key': 'biometric_unlock', 'value': '1'});
-    await _db.insert('settings', {'key': 'screenshot_protection', 'value': '0'});
+    await _db
+        .insert('settings', {'key': 'screenshot_protection', 'value': '0'});
     await _db.insert('settings', {'key': 'decimal_places', 'value': '2'});
     await _db.insert('settings', {'key': 'week_start', 'value': 'Monday'});
     await _db.insert('settings', {'key': 'app_language', 'value': 'system'});
@@ -540,6 +611,7 @@ class AppState extends ChangeNotifier {
       ),
     });
   }
+
   Future<void> updateCategory(Category updated) async {
     final index = _categories.indexWhere((c) => c.id == updated.id);
     if (index == -1) return;
@@ -549,7 +621,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateCategoryOrder(CategoryType type, List<Category> ordered) async {
+  Future<void> updateCategoryOrder(
+      CategoryType type, List<Category> ordered) async {
     for (var i = 0; i < ordered.length; i++) {
       final category = ordered[i];
       if (category.type != type) continue;
@@ -611,8 +684,7 @@ class AppState extends ChangeNotifier {
     _recurringTasks = [..._recurringTasks, task];
     final templateMap = task.templateBill
         .toMap(tagsJson: AppDatabase.encodeTags(task.templateBill.tags));
-    await _db.insert('recurring_tasks',
-        task.toMap(jsonEncode(templateMap)));
+    await _db.insert('recurring_tasks', task.toMap(jsonEncode(templateMap)));
     notifyListeners();
   }
 
@@ -692,7 +764,8 @@ class AppState extends ChangeNotifier {
   }
 
   double totalAssets() {
-    return _accounts.fold(0.0, (sum, account) => sum + accountBalance(account.id));
+    return _accounts.fold(
+        0.0, (sum, account) => sum + accountBalance(account.id));
   }
 
   Budget budgetForMonth(DateTime month) {
@@ -755,7 +828,8 @@ class AppState extends ChangeNotifier {
 
   void deleteRecord(String recordId) {
     _records.removeWhere((item) => item.id == recordId);
-    unawaited(_db.delete('transactions', where: 'id = ?', whereArgs: [recordId]));
+    unawaited(
+        _db.delete('transactions', where: 'id = ?', whereArgs: [recordId]));
     notifyListeners();
   }
 
@@ -816,8 +890,8 @@ class AppState extends ChangeNotifier {
         .toList();
     _budgets = budgets.map(BudgetMapping.fromMap).toList();
     _recurringTasks = recurring.map((row) {
-      final templateMap = jsonDecode(row['template_json'] as String)
-          as Map<String, dynamic>;
+      final templateMap =
+          jsonDecode(row['template_json'] as String) as Map<String, dynamic>;
       final tags = AppDatabase.decodeTags(templateMap['tags'] as String);
       final template = TransactionMapping.fromMap(templateMap, tags);
       return RecurringTaskMapping.fromMap(row, template);

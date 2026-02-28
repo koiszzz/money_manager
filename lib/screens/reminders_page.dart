@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
+import '../base_service.dart';
 import '../data/app_state.dart';
 import '../l10n/app_localizations.dart';
+import '../services/local_notification_service.dart';
+import '../services/reminder_service.dart';
 import '../theme/app_theme.dart';
-import '../utils/formatters.dart';
 
 class RemindersPage extends StatelessWidget {
   const RemindersPage({super.key});
@@ -23,16 +26,27 @@ class RemindersPage extends StatelessWidget {
           children: [
             _HeaderBar(
               title: strings.reminders,
-              onBack: () => Navigator.of(context).pop(),
+              onBack: () => context.pop(),
             ),
             _PermissionCard(
               enabled: appState.systemNotificationsEnabled,
-              onChanged: (value) => appState.toggleSystemNotifications(value),
+              onChanged: (value) => _toggleSystemNotification(
+                appState,
+                value,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _TestNotificationCard(
+              title: strings.testNotification,
+              subtitle: strings.testNotificationDesc,
+              buttonLabel: strings.sendNow,
+              onTap: () => _sendTestNotification(context, appState),
             ),
             const SizedBox(height: 20),
-            Text(strings.alertsReminders,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(
+              strings.alertsReminders,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 12),
             _ToggleTile(
               icon: Symbols.calendar_today,
@@ -59,21 +73,22 @@ class RemindersPage extends StatelessWidget {
               onChanged: (value) => appState.toggleRecurringReminder(value),
             ),
             const SizedBox(height: 20),
-            Text(strings.schedule,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(
+              strings.schedule,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 12),
             _ReminderTimeCard(
-              time: appState.reminderTime,
+              time: _formatDisplayTime(context, appState.reminderTime),
               onTap: () =>
                   _pickTime(context, appState, target: _TimeTarget.reminder),
             ),
             const SizedBox(height: 12),
             _DndCard(
               enabled: appState.dndEnabled,
-              from: appState.dndFrom,
-              to: appState.dndTo,
-              onToggle: (value) => appState.updateDndEnabled(value),
+              from: _formatDisplayTime(context, appState.dndFrom),
+              to: _formatDisplayTime(context, appState.dndTo),
+              onToggle: (value) => _toggleDnd(context, appState, value),
               onPickFrom: () =>
                   _pickTime(context, appState, target: _TimeTarget.dndFrom),
               onPickTo: () =>
@@ -90,24 +105,110 @@ class RemindersPage extends StatelessWidget {
     AppState appState, {
     required _TimeTarget target,
   }) async {
+    final strings = AppLocalizations.of(context);
     final now = TimeOfDay.now();
     final result = await showTimePicker(context: context, initialTime: now);
+    if (!context.mounted) return;
     if (result == null) return;
-    final time = Formatters.timeLabel(
-      DateTime(2026, 1, 1, result.hour, result.minute),
-      locale: Localizations.localeOf(context).toString(),
-    );
+
+    final time = _toStorageTime(result);
     switch (target) {
       case _TimeTarget.reminder:
+        if (appState.reminderConflictsWithDnd(reminder: time)) {
+          _showConflictMessage(context, strings.reminderDndConflict);
+          return;
+        }
         await appState.updateReminderTime(time);
         break;
       case _TimeTarget.dndFrom:
+        if (appState.reminderConflictsWithDnd(from: time)) {
+          _showConflictMessage(context, strings.reminderDndConflict);
+          return;
+        }
         await appState.updateDndFrom(time);
         break;
       case _TimeTarget.dndTo:
+        if (appState.reminderConflictsWithDnd(to: time)) {
+          _showConflictMessage(context, strings.reminderDndConflict);
+          return;
+        }
         await appState.updateDndTo(time);
         break;
     }
+  }
+
+  Future<void> _toggleDnd(
+    BuildContext context,
+    AppState appState,
+    bool enabled,
+  ) async {
+    final strings = AppLocalizations.of(context);
+    if (enabled && appState.reminderConflictsWithDnd(dnd: true)) {
+      _showConflictMessage(context, strings.reminderDndConflict);
+      return;
+    }
+    await appState.updateDndEnabled(enabled);
+  }
+
+  Future<void> _toggleSystemNotification(
+      AppState appState, bool enabled) async {
+    if (enabled) {
+      await getIt<LocalNotificationService>().requestPermissions();
+    }
+    await appState.toggleSystemNotifications(enabled);
+  }
+
+  Future<void> _sendTestNotification(
+    BuildContext context,
+    AppState appState,
+  ) async {
+    final strings = AppLocalizations.of(context);
+    if (!appState.systemNotificationsEnabled) {
+      _showConflictMessage(context, strings.enableSystemNotificationFirst);
+      return;
+    }
+
+    final nowTime = _toStorageTime(TimeOfDay.now());
+    if (appState.dndEnabled &&
+        ReminderService.isTimeInDndWindow(
+          time: nowTime,
+          dndFrom: appState.dndFrom,
+          dndTo: appState.dndTo,
+        )) {
+      _showConflictMessage(context, strings.testNotificationBlockedByDnd);
+      return;
+    }
+
+    await getIt<LocalNotificationService>().showNow(
+      id: LocalNotificationService.testNotificationId,
+      title: strings.testNotification,
+      body: strings.testNotificationBody,
+      payload: 'test_notification',
+    );
+    if (!context.mounted) return;
+    _showConflictMessage(context, strings.testNotificationSent);
+  }
+
+  String _toStorageTime(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  String _formatDisplayTime(BuildContext context, String raw) {
+    final parsed = ReminderService.parseTimeToMinutes(raw);
+    if (parsed == null) return raw;
+    final tod = TimeOfDay(hour: parsed ~/ 60, minute: parsed % 60);
+    return MaterialLocalizations.of(context).formatTimeOfDay(
+      tod,
+      alwaysUse24HourFormat: false,
+    );
+  }
+
+  void _showConflictMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 }
 
@@ -163,24 +264,30 @@ class _PermissionCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.2),
+              color: AppTheme.primary.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Symbols.notifications_active,
-                color: AppTheme.primary),
+            child: const Icon(
+              Symbols.notifications_active,
+              color: AppTheme.primary,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(strings.systemPermissions,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  strings.systemPermissions,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   enabled ? strings.statusEnabled : strings.statusDisabled,
-                  style:
-                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style: TextStyle(
+                    color: AppTheme.mutedText(context),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -225,7 +332,7 @@ class _ToggleTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color),
@@ -235,16 +342,86 @@ class _ToggleTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle,
-                    style: const TextStyle(
-                        color: AppTheme.textMuted, fontSize: 12)),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: AppTheme.mutedText(context),
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
           Switch(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+}
+
+class _TestNotificationCard extends StatelessWidget {
+  const _TestNotificationCard({
+    required this.title,
+    required this.subtitle,
+    required this.buttonLabel,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final String buttonLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.surface(context, level: 1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.outline(context)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFF8B5CF6).withValues(alpha: 0.18),
+              shape: BoxShape.circle,
+            ),
+            child:
+                const Icon(Symbols.notification_add, color: Color(0xFF8B5CF6)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: AppTheme.mutedText(context),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onTap,
+            child: Text(buttonLabel),
+          ),
         ],
       ),
     );
@@ -275,10 +452,15 @@ class _ReminderTimeCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Symbols.schedule, color: AppTheme.textMuted),
+                  Icon(
+                    Symbols.schedule,
+                    color: AppTheme.mutedText(context),
+                  ),
                   const SizedBox(width: 6),
-                  Text(strings.reminderTimeLabel,
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    strings.reminderTimeLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
               GestureDetector(
@@ -287,13 +469,16 @@ class _ReminderTimeCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.15),
+                    color: AppTheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(time,
-                      style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.w700)),
+                  child: Text(
+                    time,
+                    style: const TextStyle(
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -301,7 +486,7 @@ class _ReminderTimeCard extends StatelessWidget {
           const SizedBox(height: 8),
           LinearProgressIndicator(
             value: 0.35,
-            backgroundColor: Colors.white.withOpacity(0.05),
+            backgroundColor: AppTheme.surface(context, level: 2),
             color: AppTheme.primary,
           ),
         ],
@@ -341,17 +526,26 @@ class _DndCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Symbols.do_not_disturb_on, color: AppTheme.textMuted),
+              Icon(
+                Symbols.do_not_disturb_on,
+                color: AppTheme.mutedText(context),
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(strings.dndTitle,
-                        style: const TextStyle(fontWeight: FontWeight.w600)),
-                    Text(strings.dndSubtitle,
-                        style: const TextStyle(
-                            color: AppTheme.textMuted, fontSize: 12)),
+                    Text(
+                      strings.dndTitle,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      strings.dndSubtitle,
+                      style: TextStyle(
+                        color: AppTheme.mutedText(context),
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -366,7 +560,10 @@ class _DndCard extends StatelessWidget {
                     label: strings.from, value: from, onTap: onPickFrom),
               ),
               const SizedBox(width: 8),
-              const Icon(Symbols.arrow_forward, color: AppTheme.textMuted),
+              Icon(
+                Symbols.arrow_forward,
+                color: AppTheme.mutedText(context),
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: _TimeBox(label: strings.to, value: to, onTap: onPickTo),
@@ -394,19 +591,25 @@ class _TimeBox extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: AppTheme.backgroundDark,
+          color: AppTheme.surface(context, level: 2),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppTheme.outline(context)),
+          boxShadow: AppTheme.cardShadow(context),
         ),
         child: Column(
           children: [
-            Text(label,
-                style:
-                    const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+            Text(
+              label,
+              style: TextStyle(
+                color: AppTheme.mutedText(context),
+                fontSize: 11,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(value,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+            Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+            ),
           ],
         ),
       ),

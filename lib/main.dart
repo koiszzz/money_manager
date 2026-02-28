@@ -7,6 +7,8 @@ import 'base_service.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/app_providers.dart';
 import 'router/app_router.dart';
+import 'services/local_notification_service.dart';
+import 'services/reminder_coordinator.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -15,11 +17,44 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  ReminderCoordinator? _reminderCoordinator;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startReminderCoordinator();
+    });
+  }
+
+  Future<void> _startReminderCoordinator() async {
+    if (_reminderCoordinator != null) return;
+    final appState = ref.read(appStateProvider);
+    final notifications = getIt<LocalNotificationService>();
+    final coordinator = ReminderCoordinator(
+      appState: appState,
+      notificationService: notifications,
+    );
+    _reminderCoordinator = coordinator;
+    await coordinator.start();
+  }
+
+  @override
+  void dispose() {
+    _reminderCoordinator?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appState = ref.watch(appStateProvider);
     final router = ref.watch(appRouterProvider);
 
@@ -53,7 +88,9 @@ class MyApp extends ConsumerWidget {
         builder: (context, child) {
           final media = MediaQuery.of(context);
           return MediaQuery(
-            data: media.copyWith(textScaleFactor: appState.fontScale),
+            data: media.copyWith(
+              textScaler: TextScaler.linear(appState.fontScale),
+            ),
             child: child ?? const SizedBox.shrink(),
           );
         },
