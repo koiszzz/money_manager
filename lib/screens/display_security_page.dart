@@ -17,7 +17,7 @@ class DisplaySecurityPage extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -191,7 +191,7 @@ class DisplaySecurityPage extends StatelessWidget {
       Map<String, String> options, ValueChanged<String> onSelected) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF16202A),
+      backgroundColor: AppTheme.surface(context, level: 0),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -248,9 +248,9 @@ class _PreviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2630),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Column(
         children: [
@@ -317,7 +317,7 @@ class _ThemeCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A2630),
+            color: AppTheme.surface(context, level: 1),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: selected ? AppTheme.primary : Colors.transparent,
@@ -332,7 +332,9 @@ class _ThemeCard extends StatelessWidget {
               Text(label,
                   style: TextStyle(
                       fontSize: 12,
-                      color: selected ? Colors.white : AppTheme.textMuted)),
+                      color: selected
+                          ? AppTheme.primary
+                          : AppTheme.mutedText(context))),
             ],
           ),
         ),
@@ -360,20 +362,20 @@ class _SettingTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF161F28),
+        color: AppTheme.surface(context, level: 2),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: const Color(0xFF1A2630),
-          child: Icon(icon, color: AppTheme.textMuted),
+          backgroundColor: AppTheme.surface(context, level: 1),
+          child: Icon(icon, color: AppTheme.mutedText(context)),
         ),
         title: Text(title),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(value, style: const TextStyle(color: AppTheme.textMuted)),
+            Text(value, style: TextStyle(color: AppTheme.mutedText(context))),
             const SizedBox(width: 4),
             const Icon(Symbols.chevron_right, size: 18),
           ],

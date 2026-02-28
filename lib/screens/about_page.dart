@@ -11,7 +11,7 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -26,7 +26,8 @@ class AboutPage extends StatelessWidget {
                   child: Center(
                     child: Text(
                       strings.about,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -37,7 +38,7 @@ class AboutPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1B2632),
+                color: AppTheme.surface(context, level: 0),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -53,7 +54,8 @@ class AboutPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(strings.appTitle,
-                            style: const TextStyle(fontWeight: FontWeight.w600)),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600)),
                         const SizedBox(height: 4),
                         Text(strings.aboutSubtitle,
                             style: const TextStyle(color: AppTheme.textMuted)),
@@ -83,7 +85,7 @@ class AboutPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1B2632),
+                color: AppTheme.surface(context, level: 0),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -121,7 +123,7 @@ class _InfoTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2632),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -132,10 +134,12 @@ class _InfoTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
                 Text(value,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12)),
               ],
             ),
           ),

@@ -54,15 +54,16 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
         ? null
         : filteredTargets.firstWhere(
             (a) => a.id == _targetId,
-            orElse: () => filteredTargets.isEmpty ? accounts.first : filteredTargets.first,
+            orElse: () => filteredTargets.isEmpty
+                ? accounts.first
+                : filteredTargets.first,
           );
 
-    final count = _sourceId == null
-        ? 0
-        : appState.countRecordsForAccount(_sourceId!);
+    final count =
+        _sourceId == null ? 0 : appState.countRecordsForAccount(_sourceId!);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -77,7 +78,8 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
                 children: [
                   Text(
                     strings.migrationTitle,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -189,7 +191,8 @@ class _AccountMigrationPageState extends State<AccountMigrationPage> {
     );
   }
 
-  Future<void> _startMigration(AppState appState, AppLocalizations strings) async {
+  Future<void> _startMigration(
+      AppState appState, AppLocalizations strings) async {
     if (_sourceId == null || _targetId == null || _sourceId == _targetId) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(strings.select)),
@@ -256,12 +259,14 @@ class _HeaderBar extends StatelessWidget {
             child: Center(
               child: Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),
           TextButton(
-              onPressed: onHelp, child: Text(AppLocalizations.of(context).help)),
+              onPressed: onHelp,
+              child: Text(AppLocalizations.of(context).help)),
         ],
       ),
     );
@@ -285,9 +290,8 @@ class _PickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ids = items
-        .map((e) => (e as dynamic).id as String)
-        .toList(growable: false);
+    final ids =
+        items.map((e) => (e as dynamic).id as String).toList(growable: false);
     final safeValue = value != null && ids.contains(value) ? value : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,9 +301,9 @@ class _PickerField extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C252E),
+            color: AppTheme.surface(context, level: 0),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
+            border: Border.all(color: AppTheme.outline(context)),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -341,9 +345,9 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C252E),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,7 +371,8 @@ class _SummaryCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   strings.migrationSummaryBody(count, source, target),
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -436,9 +441,8 @@ class _MigrationHistoryList extends StatelessWidget {
         const SizedBox(height: 8),
         ...history.map((item) {
           final date = DateTime.tryParse(item['at']?.toString() ?? '');
-          final label = date == null
-              ? '--'
-              : Formatters.dateLabel(date, locale: locale);
+          final label =
+              date == null ? '--' : Formatters.dateLabel(date, locale: locale);
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Text(

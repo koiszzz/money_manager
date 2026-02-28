@@ -68,7 +68,7 @@ class _CategoriesTagsPageState extends State<CategoriesTagsPage>
     ];
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -158,7 +158,8 @@ class _CategoriesTagsPageState extends State<CategoriesTagsPage>
               children: [
                 TextField(
                   controller: nameController,
-                  decoration: InputDecoration(hintText: strings.accountTypeName),
+                  decoration:
+                      InputDecoration(hintText: strings.accountTypeName),
                 ),
                 const SizedBox(height: 12),
                 _NaturePicker(
@@ -263,7 +264,8 @@ class _HeaderBar extends StatelessWidget {
             child: Center(
               child: Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -299,7 +301,7 @@ class _SearchField extends StatelessWidget {
         hintText: hint,
         prefixIcon: const Icon(Symbols.search),
         filled: true,
-        fillColor: const Color(0xFF1C252E),
+        fillColor: AppTheme.surface(context, level: 0),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -331,9 +333,8 @@ class _CategoryTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final strings = AppLocalizations.of(context);
-    final filtered = data.categories
-        .where((c) => c.name.contains(query))
-        .toList();
+    final filtered =
+        data.categories.where((c) => c.name.contains(query)).toList();
 
     final frequent = _topCategories(appState, data.categories, limit: 3);
 
@@ -399,8 +400,7 @@ class _CategoryTab extends StatelessWidget {
     final usage = <String, int>{};
     for (final record in appState.records) {
       if (record.categoryId == null) continue;
-      usage.update(record.categoryId!, (value) => value + 1,
-          ifAbsent: () => 1);
+      usage.update(record.categoryId!, (value) => value + 1, ifAbsent: () => 1);
     }
     final sorted = [...categories]
       ..sort((a, b) => (usage[b.id] ?? 0).compareTo(usage[a.id] ?? 0));
@@ -506,9 +506,9 @@ class _AccountTypeCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C252E),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         children: [
@@ -532,7 +532,8 @@ class _AccountTypeCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   _natureLabel(option.nature, strings),
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -814,15 +815,13 @@ class _FrequentCategory extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: const Color(0xFF1C252E),
+              color: AppTheme.surface(context, level: 0),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.06)),
+              border: Border.all(color: AppTheme.outline(context)),
             ),
             child: Icon(
               IconData(
-                category.icon == 0
-                    ? Symbols.category.codePoint
-                    : category.icon,
+                category.icon == 0 ? Symbols.category.codePoint : category.icon,
                 fontFamily: 'MaterialSymbolsOutlined',
                 fontPackage: 'material_symbols_icons',
               ),
@@ -833,7 +832,8 @@ class _FrequentCategory extends StatelessWidget {
           const SizedBox(height: 6),
           Text(category.name,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+              style:
+                  const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -851,7 +851,7 @@ class _FrequentEmpty extends StatelessWidget {
       width: 120,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C252E),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Center(
@@ -874,9 +874,9 @@ class _CategoryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C252E),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         children: [
@@ -889,9 +889,7 @@ class _CategoryCard extends StatelessWidget {
             ),
             child: Icon(
               IconData(
-                category.icon == 0
-                    ? Symbols.category.codePoint
-                    : category.icon,
+                category.icon == 0 ? Symbols.category.codePoint : category.icon,
                 fontFamily: 'MaterialSymbolsOutlined',
                 fontPackage: 'material_symbols_icons',
               ),
@@ -909,7 +907,8 @@ class _CategoryCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${appState.countRecordsForCategory(category.id)} ${strings.recordsLabel}',
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 11),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 11),
                 ),
               ],
             ),
@@ -946,9 +945,8 @@ class _CategoryCard extends StatelessWidget {
     switch (action) {
       case _CategoryAction.edit:
         final controller = TextEditingController(text: category.name);
-        int selectedIcon = category.icon == 0
-            ? Symbols.category.codePoint
-            : category.icon;
+        int selectedIcon =
+            category.icon == 0 ? Symbols.category.codePoint : category.icon;
         final result = await showDialog<_CategoryEditResult>(
           context: context,
           builder: (context) => StatefulBuilder(

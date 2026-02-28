@@ -29,7 +29,7 @@ class _StorageCleanupPageState extends State<StorageCleanupPage> {
     final appState = context.watch<AppState>();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -55,8 +55,8 @@ class _StorageCleanupPageState extends State<StorageCleanupPage> {
                   label: strings.clearCache,
                   icon: Symbols.cleaning_services,
                   onTap: () {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(strings.cacheCleared)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(strings.cacheCleared)));
                   },
                 ),
                 const SizedBox(height: 12),
@@ -69,7 +69,8 @@ class _StorageCleanupPageState extends State<StorageCleanupPage> {
                 const SizedBox(height: 8),
                 Text(strings.clearAllNote,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12)),
               ],
             ),
             if (_showPinPrompt)
@@ -85,8 +86,8 @@ class _StorageCleanupPageState extends State<StorageCleanupPage> {
                       SnackBar(content: Text(strings.clearAllDone)),
                     );
                   } else {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(strings.pinError)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(strings.pinError)));
                   }
                 },
               ),
@@ -134,10 +135,11 @@ class _UsageHero extends StatelessWidget {
           width: 120,
           height: 120,
           decoration: BoxDecoration(
-            color: const Color(0xFF1C252E),
+            color: AppTheme.surface(context, level: 0),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Symbols.database, color: AppTheme.primary, size: 40),
+          child:
+              const Icon(Symbols.database, color: AppTheme.primary, size: 40),
         ),
         const SizedBox(height: 12),
         Text(AppLocalizations.of(context).storageUsed,
@@ -156,9 +158,9 @@ class _DetailCard extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF19232C),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Column(
         children: [
@@ -214,10 +216,12 @@ class _DetailRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text(subtitle,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12)),
               ],
             ),
           ),
@@ -245,9 +249,12 @@ class _ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-            danger ? const Color(0xFFEF4444).withOpacity(0.15) : const Color(0xFF1C252E),
-        foregroundColor: danger ? const Color(0xFFEF4444) : Colors.white,
+        backgroundColor: danger
+            ? const Color(0xFFEF4444).withOpacity(0.15)
+            : AppTheme.surface(context, level: 0),
+        foregroundColor: danger
+            ? const Color(0xFFEF4444)
+            : Theme.of(context).colorScheme.onSurface,
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -279,7 +286,7 @@ class _PinOverlay extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           margin: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: const Color(0xFF15202B),
+            color: AppTheme.surface(context, level: 2),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -292,7 +299,8 @@ class _PinOverlay extends StatelessWidget {
               const SizedBox(height: 8),
               Text(strings.confirmIdentityDesc,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,

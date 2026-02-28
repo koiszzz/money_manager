@@ -1,50 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
-import '../data/app_state.dart';
+import '../controllers/add_edit_transaction/add_edit_transaction_controller.dart';
 import '../data/models.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/app_providers.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 
-class AddEditTransactionPage extends StatefulWidget {
+class AddEditTransactionPage extends ConsumerStatefulWidget {
   const AddEditTransactionPage({super.key, this.record, this.isCopy = false});
 
   final TransactionRecord? record;
   final bool isCopy;
 
   @override
-  State<AddEditTransactionPage> createState() => _AddEditTransactionPageState();
+  ConsumerState<AddEditTransactionPage> createState() =>
+      _AddEditTransactionPageState();
 }
 
-class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
-  late TransactionType _type;
-  String _amountInput = '';
-  bool _showKeypad = true;
+class _AddEditTransactionPageState
+    extends ConsumerState<AddEditTransactionPage> {
   final TextEditingController _noteController = TextEditingController();
-  DateTime _occurredAt = DateTime.now();
-  String? _categoryId;
-  String? _accountId;
-  String? _transferInAccountId;
-  List<String> _selectedTags = [];
-  bool _defaultsApplied = false;
+  late final AddEditTransactionArgs _args;
+
+  AddEditTransactionState get _state =>
+      ref.watch(addEditTransactionControllerProvider(_args));
+  AddEditTransactionController get _controller =>
+      ref.read(addEditTransactionControllerProvider(_args).notifier);
 
   @override
   void initState() {
     super.initState();
-    _type = widget.record?.type ?? TransactionType.expense;
-
-    if (widget.record != null) {
-      final record = widget.record!;
-      _amountInput = record.amount.toStringAsFixed(2);
-      _noteController.text = record.note ?? '';
-      _occurredAt = record.occurredAt;
-      _categoryId = record.categoryId;
-      _accountId = record.accountId;
-      _transferInAccountId = record.transferInAccountId;
-      _selectedTags = List.of(record.tags);
-    }
+    _args =
+        AddEditTransactionArgs(record: widget.record, isCopy: widget.isCopy);
+    _noteController.text = widget.record?.note ?? '';
   }
 
   @override
@@ -53,194 +45,72 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_defaultsApplied) return;
-    final appState = context.read<AppState>();
-    if (_accountId == null && appState.accounts.isNotEmpty) {
-      _accountId = appState.accounts.first.id;
-    }
-    if (_type == TransactionType.transfer &&
-        _transferInAccountId == null &&
-        appState.accounts.length > 1) {
-      final target = appState.accounts
-          .firstWhere((acc) => acc.id != _accountId, orElse: () => appState.accounts.first);
-      if (target.id != _accountId) {
-        _transferInAccountId = target.id;
-      }
-    }
-    _defaultsApplied = true;
-  }
-
-  double get _amountValue => double.tryParse(_amountInput) ?? 0;
-
-  bool get _canSave {
-    if (_amountValue <= 0) return false;
-    if (_type == TransactionType.transfer) {
-      return _accountId != null &&
-          _transferInAccountId != null &&
-          _accountId != _transferInAccountId;
-    }
-    return _accountId != null && _categoryId != null;
-  }
-
-  void _setType(TransactionType type) {
-    setState(() {
-      _type = type;
-      if (_type == TransactionType.transfer) {
-        _categoryId = null;
-        final appState = context.read<AppState>();
-        if (_transferInAccountId == null ||
-            _transferInAccountId == _accountId) {
-          final target = appState.accounts.firstWhere(
-            (acc) => acc.id != _accountId,
-            orElse: () => appState.accounts.first,
-          );
-          if (target.id != _accountId) {
-            _transferInAccountId = target.id;
-          }
-        }
-      }
-    });
-  }
-
-  void _appendAmount(String value) {
-    setState(() {
-      if (value == '.') {
-        if (_amountInput.contains('.')) {
-          _amountInput = _amountValue.toStringAsFixed(0);
-        }
-        _amountInput = _amountInput.isEmpty ? '0.' : '$_amountInput.';
-        return;
-      }
-      if (RegExp(r'^\d+\.\d{2}$').hasMatch(_amountInput)) {
-        // 已有两位小数，不能再输入数字
-        return;
-      }
-      if (value == '00') {
-        if (_amountInput.isEmpty) return;
-        _amountInput += '00';
-        return;
-      }
-      if (_amountInput == '0') {
-        _amountInput = value;
-      } else {
-        _amountInput += value;
-      }
-    });
-  }
-
-  void _backspace() {
-    setState(() {
-      if (_amountInput.isEmpty) return;
-      _amountInput = _amountInput.substring(0, _amountInput.length - 1);
-    });
-  }
-
-  void _toggleKeypad() {
-    setState(() => _showKeypad = !_showKeypad);
-  }
-
-  void _clearAmount() {
-    setState(() {
-      _amountInput = '0';
-    });
-  }
-
   Future<void> _pickDate() async {
     final selected = await showDatePicker(
       context: context,
-      initialDate: _occurredAt,
+      initialDate: _state.occurredAt,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
     if (selected != null) {
-      setState(() => _occurredAt = selected);
+      _controller.setOccurredAt(selected);
     }
   }
 
   void _save({required bool keepAdding}) {
     final strings = AppLocalizations.of(context);
-    if (!_canSave) {
+    final result =
+        _controller.save(note: _noteController.text, keepAdding: keepAdding);
+    if (result == SaveTransactionResult.invalid) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(strings.select)),
       );
       return;
     }
-    final appState = context.read<AppState>();
-    final draft = TransactionRecord(
-      id: widget.record?.id ?? 'draft',
-      type: _type,
-      amount: _amountValue,
-      categoryId: _type == TransactionType.transfer ? null : _categoryId,
-      accountId: _accountId!,
-      transferInAccountId:
-          _type == TransactionType.transfer ? _transferInAccountId : null,
-      occurredAt: _occurredAt,
-      note: _noteController.text.trim().isEmpty
-          ? null
-          : _noteController.text.trim(),
-      tags: _selectedTags,
-      createdAt: widget.record?.createdAt ?? DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    if (widget.record == null || widget.isCopy) {
-      appState.addRecord(draft);
-    } else {
-      appState.updateRecord(draft);
-    }
-
-    if (keepAdding) {
-      setState(() {
-        _amountInput = '';
-      });
+    if (result == SaveTransactionResult.savedAndContinue) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(strings.save)));
       return;
     }
-
-    Navigator.of(context).pop();
+    context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
-    final appState = context.watch<AppState>();
+    final state = _state;
+    final appState = ref.watch(appStateProvider);
     final allCategories = appState.categoriesByType(
-      _type == TransactionType.income
+      state.type == TransactionType.income
           ? TransactionType.income
           : TransactionType.expense,
     );
-    final recentCategories = _recentCategories(
-      appState,
-      allCategories,
-      selectedId: _categoryId,
-      limit: 4,
-    );
+    final recentCategories =
+        _controller.recentCategories(allCategories, limit: 4);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(strings.addTransaction),
         actions: [
           IconButton(
-            onPressed: _toggleKeypad,
-            icon: Icon(_showKeypad ? Symbols.keyboard_hide : Symbols.keyboard),
+            onPressed: _controller.toggleKeypad,
+            icon: Icon(
+                state.showKeypad ? Symbols.keyboard_hide : Symbols.keyboard),
           ),
         ],
       ),
       body: Stack(
         children: [
           ListView(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, _showKeypad ? 240 : 16),
+            padding:
+                EdgeInsets.fromLTRB(16, 12, 16, state.showKeypad ? 240 : 16),
             children: [
               Center(
                 child: InkWell(
                   onTap: () {
-                    if (!_showKeypad) {
-                      setState(() => _showKeypad = true);
+                    if (!state.showKeypad) {
+                      _controller.toggleKeypad();
                     }
                   },
                   borderRadius: BorderRadius.circular(12),
@@ -250,14 +120,15 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                     child: Column(
                       children: [
                         Text(strings.amount,
-                            style: const TextStyle(color: AppTheme.textMuted)),
+                            style:
+                                TextStyle(color: AppTheme.mutedText(context))),
                         const SizedBox(height: 6),
                         Text(
                           Formatters.money(
-                            _type == TransactionType.expense
-                                ? -_amountValue
-                                : _amountValue,
-                            showSign: _type != TransactionType.transfer,
+                            state.type == TransactionType.expense
+                                ? -state.amountValue
+                                : state.amountValue,
+                            showSign: state.type != TransactionType.transfer,
                             locale: locale,
                             currencyCode: appState.currencyCode,
                             decimalDigits: appState.decimalPlaces,
@@ -274,12 +145,12 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
               ),
               const SizedBox(height: 16),
               _TypeTabs(
-                type: _type,
-                onChanged: _setType,
+                type: state.type,
+                onChanged: _controller.setType,
                 strings: strings,
               ),
               const SizedBox(height: 16),
-              if (_type != TransactionType.transfer) ...[
+              if (state.type != TransactionType.transfer) ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -295,8 +166,8 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                 const SizedBox(height: 8),
                 _CategoryGrid(
                   categories: recentCategories,
-                  selectedId: _categoryId,
-                  onSelected: (id) => setState(() => _categoryId = id),
+                  selectedId: state.categoryId,
+                  onSelected: _controller.setCategory,
                   limit: 4,
                 ),
                 const SizedBox(height: 16),
@@ -309,7 +180,7 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                       onTap: () async {
                         final result = await showModalBottomSheet<String>(
                           context: context,
-                          backgroundColor: const Color(0xFF16202A),
+                          backgroundColor: AppTheme.surface(context, level: 0),
                           shape: const RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.vertical(top: Radius.circular(20)),
@@ -328,17 +199,7 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                         );
 
                         if (result != null) {
-                          setState(() => _accountId = result);
-                          if (_type == TransactionType.transfer &&
-                              _transferInAccountId == result) {
-                            final fallback = appState.accounts.firstWhere(
-                              (acc) => acc.id != result,
-                              orElse: () => appState.accounts.first,
-                            );
-                            if (fallback.id != result) {
-                              _transferInAccountId = fallback.id;
-                            }
-                          }
+                          _controller.setAccount(result);
                         }
                       },
                       child: Row(
@@ -349,7 +210,7 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                                 ? ''
                                 : appState.accounts
                                     .firstWhere(
-                                      (e) => e.id == _accountId,
+                                      (e) => e.id == state.accountId,
                                       orElse: () => appState.accounts.first,
                                     )
                                     .name,
@@ -368,7 +229,8 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            Formatters.dateLabel(_occurredAt, locale: locale),
+                            Formatters.dateLabel(state.occurredAt,
+                                locale: locale),
                           ),
                           const Icon(Symbols.calendar_month, size: 18),
                         ],
@@ -377,18 +239,18 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                   ),
                 ],
               ),
-              if (_type == TransactionType.transfer) ...[
+              if (state.type == TransactionType.transfer) ...[
                 const SizedBox(height: 12),
                 _FormBox(
                   label: strings.account.toUpperCase(),
                   onTap: () async {
                     final accounts = appState.accounts
-                        .where((acc) => acc.id != _accountId)
+                        .where((acc) => acc.id != state.accountId)
                         .toList();
 
                     final result = await showModalBottomSheet<String>(
                       context: context,
-                      backgroundColor: const Color(0xFF16202A),
+                      backgroundColor: AppTheme.surface(context, level: 0),
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.vertical(
                           top: Radius.circular(20),
@@ -408,18 +270,19 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                     );
 
                     if (result != null) {
-                      setState(() => _transferInAccountId = result);
+                      _controller.setTransferInAccount(result);
                     }
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _transferInAccountId == null ||
+                        state.transferInAccountId == null ||
                                 appState.accounts.isEmpty
                             ? AppLocalizations.of(context).select
                             : appState.accounts
-                                .firstWhere((e) => e.id == _transferInAccountId)
+                                .firstWhere(
+                                    (e) => e.id == state.transferInAccountId)
                                 .name,
                       ),
                       const Icon(Symbols.expand_more, size: 18),
@@ -429,25 +292,33 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
               ],
               const SizedBox(height: 12),
               Text(strings.note.toUpperCase(),
-                  style:
-                      const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                  style: TextStyle(
+                    color: AppTheme.mutedText(context),
+                    fontSize: 12,
+                  )),
               const SizedBox(height: 6),
               TextField(
                 controller: _noteController,
                 decoration: InputDecoration(
                   hintText: strings.tapToAdd,
                   filled: true,
-                  fillColor: const Color(0xFF141E2A),
+                  fillColor: AppTheme.surface(context, level: 1),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: AppTheme.outline(context)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppTheme.outline(context)),
                   ),
                 ),
               ),
               const SizedBox(height: 12),
               Text(strings.tags.toUpperCase(),
-                  style:
-                      const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                  style: TextStyle(
+                    color: AppTheme.mutedText(context),
+                    fontSize: 12,
+                  )),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -457,12 +328,11 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                     label: strings.add,
                     onTap: () => _showTagPicker(strings, appState.tags),
                   ),
-                  ..._selectedTags.map(
+                  ...state.selectedTags.map(
                     (tag) => Chip(
                       label: Text('#$tag'),
                       deleteIcon: const Icon(Symbols.close, size: 16),
-                      onDeleted: () =>
-                          setState(() => _selectedTags.remove(tag)),
+                      onDeleted: () => _controller.removeTag(tag),
                     ),
                   )
                 ],
@@ -472,16 +342,18 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed:
-                          _canSave ? () => _save(keepAdding: true) : null,
+                      onPressed: _controller.canSave
+                          ? () => _save(keepAdding: true)
+                          : null,
                       child: Text(strings.saveAndAdd),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed:
-                          _canSave ? () => _save(keepAdding: false) : null,
+                      onPressed: _controller.canSave
+                          ? () => _save(keepAdding: false)
+                          : null,
                       child: Text(strings.save),
                     ),
                   ),
@@ -489,20 +361,20 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
               ),
             ],
           ),
-          if (_showKeypad)
+          if (state.showKeypad)
             Align(
               alignment: Alignment.bottomCenter,
               child: _Keypad(
-                onKeyTap: _appendAmount,
-                onBackspace: _backspace,
-                onSubmit: _canSave
+                onKeyTap: _controller.appendAmount,
+                onBackspace: _controller.backspace,
+                onSubmit: _controller.canSave
                     ? () {
                         _save(keepAdding: false);
-                        setState(() => _showKeypad = false);
+                        _controller.hideKeypad();
                       }
                     : null,
-                onHide: _toggleKeypad,
-                onClear: _clearAmount,
+                onHide: _controller.toggleKeypad,
+                onClear: _controller.clearAmount,
               ),
             ),
         ],
@@ -514,20 +386,20 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
       AppLocalizations strings, List<String> tags) async {
     final result = await showModalBottomSheet<List<String>>(
       context: context,
-      backgroundColor: const Color(0xFF16202A),
+      backgroundColor: AppTheme.surface(context, level: 0),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _TagPickerSheet(
         tags: tags,
-        selected: _selectedTags,
+        selected: _state.selectedTags,
         title: strings.tags,
         confirmLabel: strings.confirm,
         cancelLabel: strings.cancel,
       ),
     );
     if (result != null) {
-      setState(() => _selectedTags = result);
+      _controller.setTags(result);
     }
   }
 
@@ -537,65 +409,19 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
   ) async {
     final result = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: const Color(0xFF16202A),
+      backgroundColor: AppTheme.surface(context, level: 0),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _CategoryPickerSheet(
         categories: categories,
-        selectedId: _categoryId,
+        selectedId: _state.categoryId,
         title: strings.category,
       ),
     );
     if (result != null) {
-      setState(() => _categoryId = result);
+      _controller.setCategory(result);
     }
-  }
-
-  List<Category> _recentCategories(
-    AppState appState,
-    List<Category> categories, {
-    required String? selectedId,
-    int limit = 4,
-  }) {
-    final lastUsed = <String, DateTime>{};
-    for (final record in appState.records) {
-      if (record.categoryId == null) continue;
-      if (_type == TransactionType.income &&
-          record.type != TransactionType.income) {
-        continue;
-      }
-      if (_type == TransactionType.expense &&
-          record.type != TransactionType.expense) {
-        continue;
-      }
-      lastUsed[record.categoryId!] = record.occurredAt;
-    }
-    final sorted = [...categories];
-    sorted.sort((a, b) {
-      final aDate = lastUsed[a.id];
-      final bDate = lastUsed[b.id];
-      if (aDate == null && bDate == null) {
-        return a.sortOrder.compareTo(b.sortOrder);
-      }
-      if (aDate == null) return 1;
-      if (bDate == null) return -1;
-      return bDate.compareTo(aDate);
-    });
-    if (sorted.length <= limit) return sorted;
-    final trimmed = sorted.take(limit).toList();
-    if (selectedId != null &&
-        !trimmed.any((c) => c.id == selectedId)) {
-      final selected = categories.firstWhere(
-        (c) => c.id == selectedId,
-        orElse: () => trimmed.first,
-      );
-      if (!trimmed.any((c) => c.id == selected.id)) {
-        trimmed.removeLast();
-        trimmed.add(selected);
-      }
-    }
-    return trimmed;
   }
 }
 
@@ -655,7 +481,8 @@ class _TabItem extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: selected ? AppTheme.primary : AppTheme.textMuted,
+                color:
+                    selected ? AppTheme.primary : AppTheme.mutedText(context),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -734,15 +561,18 @@ class _CategoryGrid extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 22,
-                      backgroundColor:
-                          selected ? AppTheme.primary : const Color(0xFF1B2632),
+                      backgroundColor: selected
+                          ? AppTheme.primary
+                          : AppTheme.surface(context, level: 1),
                       child: Icon(
                         IconData(
                           cat.icon == 0 ? Symbols.category.codePoint : cat.icon,
                           fontFamily: 'MaterialSymbolsOutlined',
                           fontPackage: 'material_symbols_icons',
                         ),
-                        color: selected ? Colors.white : AppTheme.textMuted,
+                        color: selected
+                            ? Colors.white
+                            : AppTheme.mutedText(context),
                         size: 18,
                       ),
                     ),
@@ -754,7 +584,9 @@ class _CategoryGrid extends StatelessWidget {
                         fontSize: 11,
                         fontWeight:
                             selected ? FontWeight.w600 : FontWeight.w400,
-                        color: selected ? AppTheme.primary : AppTheme.textMuted,
+                        color: selected
+                            ? AppTheme.primary
+                            : AppTheme.mutedText(context),
                       ),
                     ),
                   ],
@@ -787,8 +619,10 @@ class _FormBox extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF141E2A),
+          color: AppTheme.surface(context, level: 1),
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.outline(context)),
+          boxShadow: AppTheme.cardShadow(context),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -796,16 +630,16 @@ class _FormBox extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
-                color: AppTheme.textMuted,
+                color: AppTheme.mutedText(context),
               ),
             ),
             const SizedBox(height: 2),
             DefaultTextStyle(
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
               ),
               child: child,
@@ -896,15 +730,16 @@ class _Keypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const dividerColor = Color(0xFF1F2A36);
-
+    final panelColor = AppTheme.surface(context, level: 1);
     return SizedBox(
       height: _rowHeight * 4, // 固定总高度
       child: Container(
         padding: const EdgeInsets.fromLTRB(8, 6, 8, 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF111A25),
+          color: panelColor,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.outline(context)),
+          boxShadow: AppTheme.cardShadow(context),
         ),
         child: Row(
           children: [
@@ -971,24 +806,6 @@ class _Keypad extends StatelessWidget {
   }
 }
 
-class _KeyRow extends StatelessWidget {
-  const _KeyRow({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 58,
-      child: Row(
-        children: children.map((child) {
-          return Expanded(child: child);
-        }).toList(),
-      ),
-    );
-  }
-}
-
 class _KeyCell extends StatelessWidget {
   final Widget child;
   final VoidCallback onTap;
@@ -1002,6 +819,7 @@ class _KeyCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final baseColor = AppTheme.surface(context, level: 2);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -1009,9 +827,9 @@ class _KeyCell extends StatelessWidget {
         alignment: Alignment.center,
         margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color:
-              highlighted ? const Color(0xFF00C853) : const Color(0xFF1B2633),
+          color: highlighted ? const Color(0xFF00C853) : baseColor,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.outline(context)),
         ),
         child: child,
       ),

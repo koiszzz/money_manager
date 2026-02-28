@@ -36,19 +36,22 @@ class _ExportReportsPageState extends State<ExportReportsPage> {
     final appState = context.watch<AppState>();
     final locale = Localizations.localeOf(context).toString();
 
-    final fileName = 'ledger_${_focusMonth.year}-${_focusMonth.month.toString().padLeft(2, '0')}';
+    final fileName =
+        'ledger_${_focusMonth.year}-${_focusMonth.month.toString().padLeft(2, '0')}';
 
     final records = appState.records
         .where((record) {
           if (_rangeStart == null || _rangeEnd == null) return false;
-          return record.occurredAt.isAfter(_rangeStart!.subtract(const Duration(days: 1))) &&
-              record.occurredAt.isBefore(_rangeEnd!.add(const Duration(days: 1)));
+          return record.occurredAt
+                  .isAfter(_rangeStart!.subtract(const Duration(days: 1))) &&
+              record.occurredAt
+                  .isBefore(_rangeEnd!.add(const Duration(days: 1)));
         })
         .take(3)
         .toList();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -61,7 +64,8 @@ class _ExportReportsPageState extends State<ExportReportsPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(strings.exportTitle,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
                 Text(strings.exportSubtitle,
                     style: const TextStyle(color: AppTheme.textMuted)),
@@ -74,8 +78,7 @@ class _ExportReportsPageState extends State<ExportReportsPage> {
                     if (value == ExportRangeType.month) {
                       _focusMonth = DateTime(now.year, now.month, 1);
                       _rangeStart = _focusMonth;
-                      _rangeEnd =
-                          DateTime(now.year, now.month + 1, 0);
+                      _rangeEnd = DateTime(now.year, now.month + 1, 0);
                     } else if (value == ExportRangeType.year) {
                       _focusMonth = DateTime(now.year, 1, 1);
                       _rangeStart = DateTime(now.year, 1, 1);
@@ -110,7 +113,8 @@ class _ExportReportsPageState extends State<ExportReportsPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(strings.exportSettings,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
                 _InputField(
                   label: strings.fileName,
@@ -129,11 +133,13 @@ class _ExportReportsPageState extends State<ExportReportsPage> {
                     Text(strings.columnsPreview,
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600)),
-                    TextButton(onPressed: () {}, child: Text(strings.editColumns)),
+                    TextButton(
+                        onPressed: () {}, child: Text(strings.editColumns)),
                   ],
                 ),
                 const SizedBox(height: 8),
-                _PreviewTable(records: records, locale: locale, appState: appState),
+                _PreviewTable(
+                    records: records, locale: locale, appState: appState),
               ],
             ),
             Positioned(
@@ -144,7 +150,8 @@ class _ExportReportsPageState extends State<ExportReportsPage> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppTheme.backgroundDark.withOpacity(0.9),
-                  border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
+                  border: Border(
+                      top: BorderSide(color: Colors.white.withOpacity(0.05))),
                 ),
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
@@ -155,8 +162,8 @@ class _ExportReportsPageState extends State<ExportReportsPage> {
                     ),
                   ),
                   onPressed: () {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(strings.exportDone)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(strings.exportDone)));
                   },
                   icon: const Icon(Symbols.ios_share),
                   label: Text(strings.exportToFile),
@@ -226,7 +233,8 @@ class _HeaderBar extends StatelessWidget {
         Expanded(
           child: Center(
             child: Text(title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           ),
         ),
         const SizedBox(width: 48),
@@ -337,19 +345,21 @@ class _CalendarCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF15202B),
+        color: AppTheme.surface(context, level: 2),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(onPressed: onPrev, icon: const Icon(Symbols.chevron_left)),
+              IconButton(
+                  onPressed: onPrev, icon: const Icon(Symbols.chevron_left)),
               Text(Formatters.monthLabel(focusMonth, locale: locale),
                   style: const TextStyle(fontWeight: FontWeight.w600)),
-              IconButton(onPressed: onNext, icon: const Icon(Symbols.chevron_right)),
+              IconButton(
+                  onPressed: onNext, icon: const Icon(Symbols.chevron_right)),
             ],
           ),
           const SizedBox(height: 8),
@@ -360,7 +370,8 @@ class _CalendarCard extends StatelessWidget {
                 Expanded(
                   child: Center(
                     child: Text(label,
-                        style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                        style: const TextStyle(
+                            color: AppTheme.textMuted, fontSize: 11)),
                   ),
                 ),
             ],
@@ -380,17 +391,21 @@ class _CalendarCard extends StatelessWidget {
               if (index < startWeekday) return const SizedBox.shrink();
               final day = index - startWeekday + 1;
               final date = DateTime(focusMonth.year, focusMonth.month, day);
-              final selected = rangeStart != null && rangeEnd != null &&
+              final selected = rangeStart != null &&
+                  rangeEnd != null &&
                   date.isAfter(rangeStart!.subtract(const Duration(days: 1))) &&
                   date.isBefore(rangeEnd!.add(const Duration(days: 1)));
-              final isStart = rangeStart != null && _isSameDay(rangeStart!, date);
+              final isStart =
+                  rangeStart != null && _isSameDay(rangeStart!, date);
               final isEnd = rangeEnd != null && _isSameDay(rangeEnd!, date);
 
               return GestureDetector(
                 onTap: () => onSelectDay(date),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: selected ? AppTheme.primary.withOpacity(0.2) : Colors.transparent,
+                    color: selected
+                        ? AppTheme.primary.withOpacity(0.2)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
@@ -398,7 +413,9 @@ class _CalendarCard extends StatelessWidget {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: (isStart || isEnd) ? AppTheme.primary : Colors.transparent,
+                        color: (isStart || isEnd)
+                            ? AppTheme.primary
+                            : Colors.transparent,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -428,7 +445,8 @@ class _CalendarCard extends StatelessWidget {
 }
 
 class _InputField extends StatelessWidget {
-  const _InputField({required this.label, required this.value, required this.suffix});
+  const _InputField(
+      {required this.label, required this.value, required this.suffix});
 
   final String label;
   final String value;
@@ -439,18 +457,20 @@ class _InputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+        Text(label,
+            style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF15202B),
+            color: AppTheme.surface(context, level: 2),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.06)),
+            border: Border.all(color: AppTheme.outline(context)),
           ),
           child: Row(
             children: [
-              const Icon(Symbols.description, color: AppTheme.textMuted, size: 18),
+              const Icon(Symbols.description,
+                  color: AppTheme.textMuted, size: 18),
               const SizedBox(width: 8),
               Expanded(child: Text(value)),
               Text(suffix, style: const TextStyle(color: AppTheme.textMuted)),
@@ -481,7 +501,7 @@ class _FormatSelector extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: value == format
                       ? AppTheme.primary.withOpacity(0.2)
-                      : const Color(0xFF15202B),
+                      : AppTheme.surface(context, level: 2),
                   foregroundColor:
                       value == format ? AppTheme.primary : AppTheme.textMuted,
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -515,9 +535,9 @@ class _PreviewTable extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF15202B),
+        color: AppTheme.surface(context, level: 2),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Column(
         children: [
@@ -553,7 +573,8 @@ class _PreviewTable extends StatelessWidget {
                   Expanded(
                       child: Text(
                     record.note ?? '--',
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppTheme.textMuted),
                   )),
                   Expanded(
                       child: Text(
@@ -580,7 +601,9 @@ class _PreviewTable extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             alignment: Alignment.center,
-            child: Text(strings.moreRows, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+            child: Text(strings.moreRows,
+                style:
+                    const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
           ),
         ],
       ),

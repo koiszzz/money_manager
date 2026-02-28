@@ -12,7 +12,8 @@ class RecurringTransactionsPage extends StatefulWidget {
   const RecurringTransactionsPage({super.key});
 
   @override
-  State<RecurringTransactionsPage> createState() => _RecurringTransactionsPageState();
+  State<RecurringTransactionsPage> createState() =>
+      _RecurringTransactionsPageState();
 }
 
 class _RecurringTransactionsPageState extends State<RecurringTransactionsPage> {
@@ -24,12 +25,11 @@ class _RecurringTransactionsPageState extends State<RecurringTransactionsPage> {
     final appState = context.watch<AppState>();
     final locale = Localizations.localeOf(context).toString();
 
-    final tasks = appState.recurringTasks
-        .where((task) => _filter.matches(task))
-        .toList();
+    final tasks =
+        appState.recurringTasks.where((task) => _filter.matches(task)).toList();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddRecurring(context, strings),
         child: const Icon(Symbols.add),
@@ -148,7 +148,8 @@ class _HeaderBar extends StatelessWidget {
             child: Center(
               child: Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -179,7 +180,8 @@ class _FilterChip extends StatelessWidget {
         selected: selected,
         onSelected: (_) => onTap(),
         selectedColor: AppTheme.primary,
-        labelStyle: TextStyle(color: selected ? Colors.white : AppTheme.textMuted),
+        labelStyle:
+            TextStyle(color: selected ? Colors.white : AppTheme.textMuted),
       ),
     );
   }
@@ -211,9 +213,9 @@ class _RecurringCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C262E),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Column(
         children: [
@@ -237,7 +239,9 @@ class _RecurringCard extends StatelessWidget {
                     Text(task.templateBill.note ?? strings.recurringTask,
                         style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
-                    Text(strings.category, style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    Text(strings.category,
+                        style: const TextStyle(
+                            color: AppTheme.textMuted, fontSize: 12)),
                   ],
                 ),
               ),
@@ -248,7 +252,8 @@ class _RecurringCard extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
                   Text(appState.currencyCode,
-                      style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                      style: const TextStyle(
+                          color: AppTheme.textMuted, fontSize: 12)),
                 ],
               )
             ],
@@ -258,27 +263,33 @@ class _RecurringCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Symbols.calendar_month, size: 16, color: AppTheme.primary),
+              const Icon(Symbols.calendar_month,
+                  size: 16, color: AppTheme.primary),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  strings.recurringNext(Formatters.dateLabel(task.nextRunAt, locale: locale)),
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  strings.recurringNext(
+                      Formatters.dateLabel(task.nextRunAt, locale: locale)),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
               ),
               if (isPending)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0x22F59E0B),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(statusLabel,
-                      style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 11)),
+                      style: const TextStyle(
+                          color: Color(0xFFF59E0B), fontSize: 11)),
                 )
               else
                 Text(statusLabel,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12)),
               const SizedBox(width: 8),
               Switch(
                 value: task.enabled,

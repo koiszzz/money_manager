@@ -16,7 +16,7 @@ class RemindersPage extends StatelessWidget {
     final appState = context.watch<AppState>();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -31,7 +31,8 @@ class RemindersPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(strings.alertsReminders,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             _ToggleTile(
               icon: Symbols.calendar_today,
@@ -59,11 +60,13 @@ class RemindersPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(strings.schedule,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             _ReminderTimeCard(
               time: appState.reminderTime,
-              onTap: () => _pickTime(context, appState, target: _TimeTarget.reminder),
+              onTap: () =>
+                  _pickTime(context, appState, target: _TimeTarget.reminder),
             ),
             const SizedBox(height: 12),
             _DndCard(
@@ -71,8 +74,10 @@ class RemindersPage extends StatelessWidget {
               from: appState.dndFrom,
               to: appState.dndTo,
               onToggle: (value) => appState.updateDndEnabled(value),
-              onPickFrom: () => _pickTime(context, appState, target: _TimeTarget.dndFrom),
-              onPickTo: () => _pickTime(context, appState, target: _TimeTarget.dndTo),
+              onPickFrom: () =>
+                  _pickTime(context, appState, target: _TimeTarget.dndFrom),
+              onPickTo: () =>
+                  _pickTime(context, appState, target: _TimeTarget.dndTo),
             ),
           ],
         ),
@@ -148,9 +153,9 @@ class _PermissionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2630),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         children: [
@@ -161,7 +166,8 @@ class _PermissionCard extends StatelessWidget {
               color: AppTheme.primary.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Symbols.notifications_active, color: AppTheme.primary),
+            child: const Icon(Symbols.notifications_active,
+                color: AppTheme.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -173,7 +179,8 @@ class _PermissionCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   enabled ? strings.statusEnabled : strings.statusDisabled,
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -208,9 +215,9 @@ class _ToggleTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2630),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         children: [
@@ -228,10 +235,12 @@ class _ToggleTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
                 Text(subtitle,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12)),
               ],
             ),
           ),
@@ -254,9 +263,9 @@ class _ReminderTimeCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2630),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,14 +284,16 @@ class _ReminderTimeCard extends StatelessWidget {
               GestureDetector(
                 onTap: onTap,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(time,
                       style: const TextStyle(
-                          color: AppTheme.primary, fontWeight: FontWeight.w700)),
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.w700)),
                 ),
               ),
             ],
@@ -322,9 +333,9 @@ class _DndCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2630),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Column(
         children: [
@@ -339,8 +350,8 @@ class _DndCard extends StatelessWidget {
                     Text(strings.dndTitle,
                         style: const TextStyle(fontWeight: FontWeight.w600)),
                     Text(strings.dndSubtitle,
-                        style:
-                            const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                        style: const TextStyle(
+                            color: AppTheme.textMuted, fontSize: 12)),
                   ],
                 ),
               ),
@@ -351,7 +362,8 @@ class _DndCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _TimeBox(label: strings.from, value: from, onTap: onPickFrom),
+                child: _TimeBox(
+                    label: strings.from, value: from, onTap: onPickFrom),
               ),
               const SizedBox(width: 8),
               const Icon(Symbols.arrow_forward, color: AppTheme.textMuted),
@@ -368,7 +380,8 @@ class _DndCard extends StatelessWidget {
 }
 
 class _TimeBox extends StatelessWidget {
-  const _TimeBox({required this.label, required this.value, required this.onTap});
+  const _TimeBox(
+      {required this.label, required this.value, required this.onTap});
 
   final String label;
   final String value;
@@ -383,14 +396,17 @@ class _TimeBox extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppTheme.backgroundDark,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          border: Border.all(color: AppTheme.outline(context)),
         ),
         child: Column(
           children: [
-            Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+            Text(label,
+                style:
+                    const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
             const SizedBox(height: 4),
             Text(value,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                style:
+                    const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
           ],
         ),
       ),

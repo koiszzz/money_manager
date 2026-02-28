@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
-import '../data/app_state.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/app_providers.dart';
+import '../router/app_router.dart';
 import '../theme/app_theme.dart';
-import 'add_edit_transaction_page.dart';
 import 'dashboard_page.dart';
 import 'reports_page.dart';
 import 'settings_page.dart';
 import 'transactions_page.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends ConsumerWidget {
   const MainPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appState = ref.watch(appStateProvider);
     if (!appState.initialized) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -33,16 +34,12 @@ class MainPage extends StatelessWidget {
     return Scaffold(
       body: IndexedStack(index: appState.tabIndex, children: pages),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const AddEditTransactionPage()),
-          );
-        },
+        onPressed: () => context.push(AppRoutes.addTransaction),
         child: const Icon(Symbols.add, size: 28),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFF0F1824),
+        color: AppTheme.bottomBar(context),
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
         child: Padding(

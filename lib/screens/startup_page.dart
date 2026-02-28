@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
-import 'main_page.dart';
-import 'pin_lock_page.dart';
+import '../router/app_router.dart';
 
 class StartupPage extends StatefulWidget {
   const StartupPage({super.key});
@@ -29,13 +29,9 @@ class _StartupPageState extends State<StartupPage> {
       return;
     }
     if (appState.appLockEnabled) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PinLockPage()),
-      );
+      context.go(AppRoutes.pinLock);
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainPage()),
-      );
+      context.go(AppRoutes.main);
     }
   }
 

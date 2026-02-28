@@ -23,7 +23,7 @@ class DataBackupRecoveryPage extends StatelessWidget {
           );
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -34,7 +34,8 @@ class DataBackupRecoveryPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(strings.backupStatus,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             _StatusCard(
               icon: Symbols.cloud_done,
@@ -51,7 +52,8 @@ class DataBackupRecoveryPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(strings.quickActions,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -86,7 +88,8 @@ class DataBackupRecoveryPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(strings.localBackups,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600)),
                 TextButton(onPressed: () {}, child: Text(strings.viewAll)),
               ],
             ),
@@ -182,9 +185,9 @@ class _StatusCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF19232C),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         children: [
@@ -202,10 +205,12 @@ class _StatusCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
                 Text(subtitle,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12)),
               ],
             ),
           ),
@@ -238,10 +243,11 @@ class _ActionButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: primary ? AppTheme.primary : const Color(0xFF19232C),
+          color:
+              primary ? AppTheme.primary : AppTheme.surface(context, level: 1),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: primary ? AppTheme.primary : Colors.white.withOpacity(0.06),
+            color: primary ? AppTheme.primary : AppTheme.outline(context),
           ),
         ),
         child: Column(
@@ -250,7 +256,9 @@ class _ActionButton extends StatelessWidget {
             const SizedBox(height: 8),
             Text(label,
                 style: TextStyle(
-                    color: primary ? Colors.white : Colors.white,
+                    color: primary
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
                     fontSize: 12)),
           ],
@@ -270,9 +278,9 @@ class _InfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF151F28),
+        color: AppTheme.surface(context, level: 2),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,9 +311,9 @@ class _BackupListItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF19232C),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         children: [
@@ -313,7 +321,7 @@ class _BackupListItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1F2A36),
+              color: AppTheme.surface(context, level: 2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Symbols.folder_zip, color: AppTheme.textMuted),
@@ -326,7 +334,8 @@ class _BackupListItem extends StatelessWidget {
                 Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text(subtitle,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12)),
               ],
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +28,7 @@ class BudgetPage extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () => context.pop(),
                 icon: const Icon(Symbols.arrow_back, size: 20),
               ),
               Expanded(
@@ -45,13 +46,15 @@ class BudgetPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: () => appState.setMonth(DateTime(month.year, month.month - 1, 1)),
+                onPressed: () =>
+                    appState.setMonth(DateTime(month.year, month.month - 1, 1)),
                 icon: const Icon(Symbols.chevron_left, size: 18),
               ),
               Text(Formatters.monthLabel(month, locale: locale),
                   style: const TextStyle(fontWeight: FontWeight.w600)),
               IconButton(
-                onPressed: () => appState.setMonth(DateTime(month.year, month.month + 1, 1)),
+                onPressed: () =>
+                    appState.setMonth(DateTime(month.year, month.month + 1, 1)),
                 icon: const Icon(Symbols.chevron_right, size: 18),
               ),
             ],
@@ -60,7 +63,7 @@ class BudgetPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF1B2632),
+              color: AppTheme.surface(context, level: 0),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -69,14 +72,17 @@ class BudgetPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(strings.budgetUsed, style: const TextStyle(color: AppTheme.textMuted)),
+                    Text(strings.budgetUsed,
+                        style: const TextStyle(color: AppTheme.textMuted)),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1F2A36),
+                        color: AppTheme.surface(context, level: 2),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(strings.onTrack, style: const TextStyle(fontSize: 10)),
+                      child: Text(strings.onTrack,
+                          style: const TextStyle(fontSize: 10)),
                     )
                   ],
                 ),
@@ -88,12 +94,16 @@ class BudgetPage extends StatelessWidget {
                     currencyCode: appState.currencyCode,
                     decimalDigits: appState.decimalPlaces,
                   ),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${strings.budgetLimit} ${Formatters.money(budget.totalAmount, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)}',
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style: TextStyle(
+                    color: AppTheme.mutedText(context),
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 ClipRRect(
@@ -101,7 +111,7 @@ class BudgetPage extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: ratio,
                     minHeight: 8,
-                    backgroundColor: const Color(0xFF263241),
+                    backgroundColor: AppTheme.surface(context, level: 2),
                     color: AppTheme.primary,
                   ),
                 ),
@@ -109,11 +119,19 @@ class BudgetPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${(ratio * 100).toStringAsFixed(0)}% ${strings.used}',
-                        style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    Text(
+                      '${(ratio * 100).toStringAsFixed(0)}% ${strings.used}',
+                      style: TextStyle(
+                        color: AppTheme.mutedText(context),
+                        fontSize: 12,
+                      ),
+                    ),
                     Text(
                       '${Formatters.money(budget.totalAmount - used, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)} ${strings.left}',
-                      style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                      style: TextStyle(
+                        color: AppTheme.mutedText(context),
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -147,7 +165,8 @@ class BudgetPage extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w600)),
               const Spacer(),
               Text(strings.viewAll,
-                  style: const TextStyle(color: AppTheme.primary, fontSize: 12)),
+                  style:
+                      const TextStyle(color: AppTheme.primary, fontSize: 12)),
             ],
           ),
           const SizedBox(height: 8),
@@ -195,7 +214,7 @@ class _CategoryBudgetTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2632),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -204,12 +223,13 @@ class _CategoryBudgetTile extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                backgroundColor: const Color(0xFF263241),
+                backgroundColor: AppTheme.surface(context, level: 2),
                 child: const Icon(Symbols.restaurant, size: 18),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                child: Text(name,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
               Text(
                 '${Formatters.money(spent, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)} / ${Formatters.money(limit, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)}',
@@ -223,7 +243,7 @@ class _CategoryBudgetTile extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: const Color(0xFF263241),
+              backgroundColor: AppTheme.surface(context, level: 2),
               color: over ? Colors.redAccent : AppTheme.primary,
             ),
           ),
@@ -233,7 +253,7 @@ class _CategoryBudgetTile extends StatelessWidget {
                 ? '${Formatters.money(remaining, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)} $overLabel'
                 : '${Formatters.money(remaining, locale: locale, currencyCode: appState.currencyCode, decimalDigits: appState.decimalPlaces)} $leftLabel',
             style: TextStyle(
-              color: over ? Colors.redAccent : AppTheme.textMuted,
+              color: over ? Colors.redAccent : AppTheme.mutedText(context),
               fontSize: 12,
             ),
           ),

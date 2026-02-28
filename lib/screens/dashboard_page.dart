@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
 import '../data/models.dart';
 import '../l10n/app_localizations.dart';
+import '../router/app_router.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
-import 'add_edit_transaction_page.dart';
-import 'budget_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -42,8 +42,10 @@ class DashboardPage extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(strings.welcomeBack,
-                      style: const TextStyle(color: AppTheme.textMuted)),
+                  Text(
+                    strings.welcomeBack,
+                    style: TextStyle(color: AppTheme.mutedText(context)),
+                  ),
                   const Text(
                     'Sarah Jenkins',
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
@@ -120,9 +122,7 @@ class DashboardPage extends StatelessWidget {
             leftLabel: strings.left,
             percentLabel: strings.used,
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const BudgetPage()),
-              );
+              context.push(AppRoutes.budget);
             },
           ),
           const SizedBox(height: 18),
@@ -144,10 +144,7 @@ class DashboardPage extends StatelessWidget {
               label: strings.noTransactions,
               actionLabel: strings.goAdd,
               onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => const AddEditTransactionPage()),
-                );
+                context.push(AppRoutes.addTransaction);
               },
             )
           else
@@ -183,8 +180,10 @@ class _MonthSwitcher extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF16202B),
+        color: AppTheme.surface(context, level: 1),
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.outline(context)),
+        boxShadow: AppTheme.cardShadow(context),
       ),
       child: Row(
         children: [
@@ -296,8 +295,10 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2632),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.outline(context)),
+        boxShadow: AppTheme.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,7 +309,7 @@ class _StatCard extends StatelessWidget {
             child: Icon(icon, color: iconColor, size: 18),
           ),
           const SizedBox(height: 10),
-          Text(title, style: const TextStyle(color: AppTheme.textMuted)),
+          Text(title, style: TextStyle(color: AppTheme.mutedText(context))),
           const SizedBox(height: 4),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
@@ -352,8 +353,10 @@ class _BudgetCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B2632),
+          color: AppTheme.surface(context, level: 0),
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.outline(context)),
+          boxShadow: AppTheme.cardShadow(context),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -370,15 +373,17 @@ class _BudgetCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
                 '${Formatters.money(used, locale: locale, currencyCode: currencyCode, decimalDigits: decimalDigits)} $usedLabel',
-                style:
-                    const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                style: TextStyle(
+                  color: AppTheme.mutedText(context),
+                  fontSize: 12,
+                )),
             const SizedBox(height: 10),
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
                 value: ratio,
                 minHeight: 8,
-                backgroundColor: const Color(0xFF263241),
+                backgroundColor: AppTheme.surface(context, level: 2),
                 color: AppTheme.primary,
               ),
             ),
@@ -388,8 +393,10 @@ class _BudgetCard extends StatelessWidget {
               children: [
                 Text(
                     '${Formatters.money(total - used, locale: locale, currencyCode: currencyCode, decimalDigits: decimalDigits)} $leftLabel',
-                    style: const TextStyle(
-                        color: AppTheme.textMuted, fontSize: 12)),
+                    style: TextStyle(
+                      color: AppTheme.mutedText(context),
+                      fontSize: 12,
+                    )),
                 Text('${(ratio * 100).toStringAsFixed(0)}% $percentLabel',
                     style:
                         const TextStyle(color: AppTheme.primary, fontSize: 12)),
@@ -427,19 +434,17 @@ class _RecentItem extends StatelessWidget {
             : Colors.blueGrey;
     return InkWell(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => AddEditTransactionPage(record: record),
-          ),
-        );
+        context.push('/transaction/${record.id}/edit');
       },
       borderRadius: BorderRadius.circular(14),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF151F2B),
+          color: AppTheme.surface(context, level: 1),
           borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.outline(context)),
+          boxShadow: AppTheme.cardShadow(context),
         ),
         child: Row(
           children: [
@@ -468,8 +473,10 @@ class _RecentItem extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '${account.name} · ${Formatters.timeLabel(record.occurredAt, locale: locale)}',
-                    style:
-                        const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                    style: TextStyle(
+                      color: AppTheme.mutedText(context),
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -509,8 +516,10 @@ class _EmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2632),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.outline(context)),
+        boxShadow: AppTheme.cardShadow(context),
       ),
       child: Column(
         children: [

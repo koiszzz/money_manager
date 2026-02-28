@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../l10n/app_localizations.dart';
+import '../router/app_router.dart';
 import '../theme/app_theme.dart';
-import 'about_page.dart';
-import 'account_management_page.dart';
-import 'categories_tags_page.dart';
-import 'data_backup_recovery_page.dart';
-import 'display_security_page.dart';
-import 'export_reports_page.dart';
-import 'recurring_transactions_page.dart';
-import 'reminders_page.dart';
-import 'security_privacy_page.dart';
-import 'storage_cleanup_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -26,14 +18,13 @@ class SettingsPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Symbols.arrow_back, size: 20),
-              const SizedBox(width: 8),
-              Text(strings.settings,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
-              const Spacer(),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Symbols.help, size: 20),
+              Expanded(
+                child: Text(
+                  strings.settings,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 18),
+                ),
               ),
             ],
           ),
@@ -47,37 +38,21 @@ class SettingsPage extends StatelessWidget {
               color: const Color(0xFF3B82F6),
               title: strings.accounts,
               subtitle: strings.accountsSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AccountManagementPage()),
-                );
-              },
+              onTap: () => context.push(AppRoutes.accountManagement),
             ),
             _SettingsItem(
               icon: Symbols.category,
               color: const Color(0xFF8B5CF6),
               title: strings.categoriesTags,
               subtitle: strings.categoriesTagsSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const CategoriesTagsPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.categoriesTags),
             ),
             _SettingsItem(
               icon: Symbols.update,
               color: const Color(0xFFF59E0B),
               title: strings.recurring,
               subtitle: strings.recurringSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const RecurringTransactionsPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.recurring),
             ),
           ]),
           const SizedBox(height: 16),
@@ -88,26 +63,14 @@ class SettingsPage extends StatelessWidget {
               color: const Color(0xFFF43F5E),
               title: strings.reminders,
               subtitle: strings.remindersSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const RemindersPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.reminders),
             ),
             _SettingsItem(
               icon: Symbols.palette,
               color: const Color(0xFF14B8A6),
               title: strings.displayLocalization,
               subtitle: strings.displaySecuritySubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const DisplaySecurityPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.displayLocalization),
             ),
           ]),
           const SizedBox(height: 16),
@@ -118,52 +81,28 @@ class SettingsPage extends StatelessWidget {
               color: const Color(0xFF6366F1),
               title: strings.backupRestore,
               subtitle: strings.backupRestoreSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const DataBackupRecoveryPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.backupRestore),
             ),
             _SettingsItem(
               icon: Symbols.ios_share,
               color: const Color(0xFF10B981),
               title: strings.exportData,
               subtitle: strings.exportDataSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const ExportReportsPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.exportData),
             ),
             _SettingsItem(
               icon: Symbols.shield_lock,
               color: const Color(0xFF0EA5E9),
               title: strings.securityPrivacy,
               subtitle: strings.securityPrivacySubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const SecurityPrivacyPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.securityPrivacy),
             ),
             _SettingsItem(
               icon: Symbols.storage,
               color: const Color(0xFFF97316),
               title: strings.storageCleanup,
               subtitle: strings.storageCleanupSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const StorageCleanupPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.storageCleanup),
             ),
           ]),
           const SizedBox(height: 16),
@@ -174,20 +113,15 @@ class SettingsPage extends StatelessWidget {
               color: const Color(0xFF64748B),
               title: strings.about,
               subtitle: strings.aboutSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const AboutPage(),
-                  ),
-                );
-              },
+              onTap: () => context.push(AppRoutes.about),
             ),
           ]),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: () {},
             icon: const Icon(Symbols.logout, color: Colors.red),
-            label: Text(strings.signOut, style: const TextStyle(color: Colors.red)),
+            label: Text(strings.signOut,
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -202,7 +136,7 @@ class _ProfileCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: const Color(0xFF1B2632),
+        color: AppTheme.surface(context, level: 0),
       ),
       child: Row(
         children: [
@@ -212,13 +146,15 @@ class _ProfileCard extends StatelessWidget {
             child: Icon(Symbols.person, color: Colors.white),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Sarah Connor', style: TextStyle(fontWeight: FontWeight.w600)),
-                SizedBox(height: 4),
-                Text('sarah.c@skynet.com', style: TextStyle(color: AppTheme.textMuted)),
+                const Text('Sarah Connor',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text('sarah.c@skynet.com',
+                    style: TextStyle(color: AppTheme.mutedText(context))),
               ],
             ),
           ),
@@ -240,8 +176,8 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Text(
         title,
-        style: const TextStyle(
-          color: AppTheme.textMuted,
+        style: TextStyle(
+          color: AppTheme.mutedText(context),
           fontSize: 12,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.1,
@@ -261,7 +197,7 @@ class _SettingsGroup extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: const Color(0xFF1B2632),
+        color: AppTheme.surface(context, level: 0),
       ),
       child: Column(children: children),
     );
@@ -291,8 +227,9 @@ class _SettingsItem extends StatelessWidget {
         child: Icon(icon, color: color),
       ),
       title: Text(title),
-      subtitle: Text(subtitle, style: const TextStyle(color: AppTheme.textMuted)),
-      trailing: const Icon(Symbols.chevron_right, color: AppTheme.textMuted),
+      subtitle:
+          Text(subtitle, style: TextStyle(color: AppTheme.mutedText(context))),
+      trailing: Icon(Symbols.chevron_right, color: AppTheme.mutedText(context)),
       onTap: onTap,
     );
   }

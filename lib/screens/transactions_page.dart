@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
 import '../data/models.dart';
 import '../l10n/app_localizations.dart';
+import '../router/app_router.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
-import 'add_edit_transaction_page.dart';
 
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
@@ -49,12 +50,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
             controller: _searchController,
             title: strings.transactionsTitle,
             searchHint: strings.searchHint,
-            onMoreTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => const AddEditTransactionPage()),
-              );
-            },
           ),
           _FilterChips(
             activeType: appState.transactionsFilterType,
@@ -67,11 +62,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     label: strings.noTransactions,
                     actionLabel: strings.goAdd,
                     onAdd: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const AddEditTransactionPage(),
-                        ),
-                      );
+                      context.push(AppRoutes.addTransaction);
                     },
                   )
                 : ListView.builder(
@@ -141,42 +132,34 @@ class _TransactionsPageState extends State<TransactionsPage> {
 class _Header extends StatelessWidget {
   const _Header({
     required this.controller,
-    required this.onMoreTap,
     required this.title,
     required this.searchHint,
   });
 
   final TextEditingController controller;
-  final VoidCallback onMoreTap;
   final String title;
   final String searchHint;
 
   @override
   Widget build(BuildContext context) {
+    final panelColor = AppTheme.surface(context, level: 1);
+    final borderColor = AppTheme.outline(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      decoration: const BoxDecoration(
-        color: Color(0xFF101822),
-        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      decoration: BoxDecoration(
+        color: panelColor,
+        border: Border(bottom: BorderSide(color: borderColor)),
       ),
       child: Column(
         children: [
           Row(
             children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Symbols.arrow_back, size: 20),
-              ),
               Expanded(
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-              ),
-              IconButton(
-                onPressed: onMoreTap,
-                icon: const Icon(Symbols.more_vert, size: 20),
               ),
             ],
           ),
@@ -190,7 +173,7 @@ class _Header extends StatelessWidget {
                     hintText: searchHint,
                     prefixIcon: const Icon(Symbols.search, size: 18),
                     filled: true,
-                    fillColor: const Color(0xFF141E2A),
+                    fillColor: AppTheme.surface(context, level: 2),
                     contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -202,7 +185,7 @@ class _Header extends StatelessWidget {
               const SizedBox(width: 10),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141E2A),
+                  color: AppTheme.surface(context, level: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
@@ -279,9 +262,9 @@ class _Chip extends StatelessWidget {
         onSelected: (_) => onTap(),
         label: Text(label),
         selectedColor: AppTheme.primary,
-        backgroundColor: const Color(0xFF1B2632),
+        backgroundColor: AppTheme.surface(context, level: 0),
         labelStyle: TextStyle(
-          color: selected ? Colors.white : AppTheme.textMuted,
+          color: selected ? Colors.white : AppTheme.mutedText(context),
           fontSize: 12,
         ),
       ),
@@ -322,11 +305,11 @@ class _GroupHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: const Color(0xFF111B26),
+      color: AppTheme.surface(context, level: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AppTheme.textMuted)),
+          Text(label, style: TextStyle(color: AppTheme.mutedText(context))),
           Text(
             Formatters.money(
               total,
@@ -414,11 +397,7 @@ class _TransactionTile extends StatelessWidget {
       ),
       child: ListTile(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => AddEditTransactionPage(record: record),
-            ),
-          );
+          context.push('/transaction/${record.id}/edit');
         },
         leading: CircleAvatar(
           backgroundColor: Color(category?.colorHex ?? 0xFF334155),
@@ -437,7 +416,10 @@ class _TransactionTile extends StatelessWidget {
         title: Text(category?.name ?? '转账'),
         subtitle: Text(
             '${account.name} • ${Formatters.timeLabel(record.occurredAt, locale: locale)}',
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+            style: TextStyle(
+              color: AppTheme.mutedText(context),
+              fontSize: 12,
+            )),
         trailing: Text(
           Formatters.money(
             record.type == TransactionType.expense

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
+import '../controllers/account_management/account_management_controller.dart';
 import '../data/app_state.dart';
 import '../data/models.dart';
 import '../l10n/app_localizations.dart';
+import '../router/app_router.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
-import 'account_migration_page.dart';
 
 class AccountManagementPage extends StatefulWidget {
   const AccountManagementPage({super.key});
@@ -22,45 +24,32 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final controller = AccountManagementController(appState);
     final strings = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
 
-    final bankAccounts = appState.accounts
-        .where((a) => a.nature == AccountNature.bank)
-        .toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final creditAccounts = appState.accounts
-        .where((a) => a.nature == AccountNature.credit)
-        .toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final loanAccounts = appState.accounts
-        .where((a) => a.nature == AccountNature.loan)
-        .toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final assetAccounts = appState.accounts
-        .where((a) => a.nature == AccountNature.asset)
-        .toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    final liabilityAccounts = appState.accounts
-        .where((a) => a.nature == AccountNature.liability)
-        .toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final bankAccounts = controller.accountsByNature(AccountNature.bank);
+    final creditAccounts = controller.accountsByNature(AccountNature.credit);
+    final loanAccounts = controller.accountsByNature(AccountNature.loan);
+    final assetAccounts = controller.accountsByNature(AccountNature.asset);
+    final liabilityAccounts =
+        controller.accountsByNature(AccountNature.liability);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             _HeaderBar(
               title: strings.accounts,
-              onBack: () => Navigator.of(context).pop(),
+              onBack: () => context.pop(),
             ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                 children: [
                   _NetWorthCard(
-                    total: appState.totalAssets(),
+                    total: controller.totalAssets,
                     locale: locale,
                     currencyCode: appState.currencyCode,
                     decimalDigits: appState.decimalPlaces,
@@ -71,9 +60,9 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                   _AccountList(
                     accounts: bankAccounts,
                     reorderMode: _reorderMode,
-                    onReorder: (next) => appState.updateAccountOrder(next),
+                    onReorder: controller.updateAccountOrder,
                     onEdit: (account) => _showAccountEditor(
-                        context, appState, strings,
+                        context, appState, controller, strings,
                         account: account),
                   ),
                   const SizedBox(height: 16),
@@ -82,9 +71,9 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                   _AccountList(
                     accounts: creditAccounts,
                     reorderMode: _reorderMode,
-                    onReorder: (next) => appState.updateAccountOrder(next),
+                    onReorder: controller.updateAccountOrder,
                     onEdit: (account) => _showAccountEditor(
-                        context, appState, strings,
+                        context, appState, controller, strings,
                         account: account),
                   ),
                   if (loanAccounts.isNotEmpty) ...[
@@ -94,10 +83,11 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                     _AccountList(
                       accounts: loanAccounts,
                       reorderMode: _reorderMode,
-                      onReorder: (next) => appState.updateAccountOrder(next),
+                      onReorder: controller.updateAccountOrder,
                       onEdit: (account) => _showAccountEditor(
                         context,
                         appState,
+                        controller,
                         strings,
                         account: account,
                       ),
@@ -110,10 +100,11 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                     _AccountList(
                       accounts: assetAccounts,
                       reorderMode: _reorderMode,
-                      onReorder: (next) => appState.updateAccountOrder(next),
+                      onReorder: controller.updateAccountOrder,
                       onEdit: (account) => _showAccountEditor(
                         context,
                         appState,
+                        controller,
                         strings,
                         account: account,
                       ),
@@ -126,10 +117,11 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                     _AccountList(
                       accounts: liabilityAccounts,
                       reorderMode: _reorderMode,
-                      onReorder: (next) => appState.updateAccountOrder(next),
+                      onReorder: controller.updateAccountOrder,
                       onEdit: (account) => _showAccountEditor(
                         context,
                         appState,
+                        controller,
                         strings,
                         account: account,
                       ),
@@ -137,11 +129,7 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                   ],
                   const SizedBox(height: 20),
                   _MigrationCard(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const AccountMigrationPage(),
-                      ),
-                    ),
+                    onTap: () => context.push(AppRoutes.accountMigration),
                   ),
                 ],
               ),
@@ -172,7 +160,8 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
               borderRadius: BorderRadius.circular(14),
             ),
           ),
-          onPressed: () => _showAccountEditor(context, appState, strings),
+          onPressed: () =>
+              _showAccountEditor(context, appState, controller, strings),
           icon: const Icon(Symbols.add_circle, size: 22),
           label: Text(
             strings.addNewAccount,
@@ -189,6 +178,7 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
   Future<void> _showAccountEditor(
     BuildContext context,
     AppState appState,
+    AccountManagementController controller,
     AppLocalizations strings, {
     Account? account,
   }) async {
@@ -221,7 +211,7 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF16202A),
+      backgroundColor: AppTheme.surface(context, level: 0),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -352,7 +342,7 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                             return;
                           }
                           if (account == null) {
-                            await appState.addAccount(
+                            await controller.addAccount(
                               name: name,
                               nature: selectedType!.nature,
                               accountTypeId: selectedType!.id,
@@ -369,27 +359,23 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                               repaymentDay: repaymentDay,
                             );
                           } else {
-                            await appState.updateAccount(Account(
-                              id: account.id,
+                            await controller.updateAccount(
+                              source: account,
                               name: name,
-                              type:
-                                  _mapNatureToAccountType(selectedType!.nature),
                               nature: selectedType!.nature,
+                              accountTypeId: selectedType!.id,
                               openingBalance: balance,
                               note: noteController.text.trim().isEmpty
                                   ? null
                                   : noteController.text.trim(),
-                              enabled: account.enabled,
-                              sortOrder: account.sortOrder,
                               iconCode: iconCode,
-                              customType: selectedType!.id,
                               cardNumber:
                                   cardNumberController.text.trim().isEmpty
                                       ? null
                                       : cardNumberController.text.trim(),
                               billingDay: billingDay,
                               repaymentDay: repaymentDay,
-                            ));
+                            );
                           }
                           if (context.mounted) Navigator.of(context).pop();
                         },
@@ -460,9 +446,9 @@ class _NetWorthCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C2A35),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Stack(
         children: [
@@ -628,9 +614,9 @@ class _AccountRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF121B24),
+        color: AppTheme.surface(context, level: 2),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Row(
         children: [
@@ -647,7 +633,7 @@ class _AccountRow extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xFF283239),
+              color: AppTheme.surface(context, level: 2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -715,7 +701,7 @@ class _AccountRow extends StatelessWidget {
   ) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF16202A),
+      backgroundColor: AppTheme.surface(context, level: 0),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -735,13 +721,8 @@ class _AccountRow extends StatelessWidget {
             title: Text(strings.accountMigration),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => AccountMigrationPage(
-                    initialSourceId: account.id,
-                  ),
-                ),
-              );
+              context
+                  .push('${AppRoutes.accountMigration}?sourceId=${account.id}');
             },
           ),
           ListTile(
@@ -780,7 +761,8 @@ class _AccountRow extends StatelessWidget {
     );
   }
 
-  String _subtitle(BuildContext context, Account account, AppLocalizations strings) {
+  String _subtitle(
+      BuildContext context, Account account, AppLocalizations strings) {
     final appState = context.read<AppState>();
     final typeLabel = _accountTypeLabel(account, appState, strings);
     if (account.nature == AccountNature.credit) {
@@ -852,9 +834,9 @@ class _MigrationCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF111A23),
+          color: AppTheme.surface(context, level: 2),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          border: Border.all(color: AppTheme.outline(context)),
         ),
         child: Row(
           children: [
@@ -970,21 +952,6 @@ class _AccountTypePicker extends StatelessWidget {
           ),
       ],
     );
-  }
-}
-
-AccountType _mapNatureToAccountType(AccountNature nature) {
-  switch (nature) {
-    case AccountNature.bank:
-      return AccountType.bank;
-    case AccountNature.credit:
-      return AccountType.creditCard;
-    case AccountNature.loan:
-      return AccountType.other;
-    case AccountNature.asset:
-      return AccountType.other;
-    case AccountNature.liability:
-      return AccountType.other;
   }
 }
 

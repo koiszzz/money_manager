@@ -1,61 +1,27 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
-import '../data/app_state.dart';
-import '../data/models.dart';
+import '../controllers/reports/reports_controller.dart';
+import '../providers/app_providers.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 
-class ReportsPage extends StatefulWidget {
+class ReportsPage extends ConsumerWidget {
   const ReportsPage({super.key});
 
   @override
-  State<ReportsPage> createState() => _ReportsPageState();
-}
-
-class _ReportsPageState extends State<ReportsPage> {
-  ReportRange _range = ReportRange.month;
-  late DateTime _selectedMonth;
-  late int _selectedYear;
-  DateTimeRange? _customRange;
-  int? _expenseTouchedIndex;
-  int? _incomeTouchedIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    final now = DateTime.now();
-    _selectedMonth = DateTime(now.year, now.month, 1);
-    _selectedYear = now.year;
-    _customRange = DateTimeRange(
-      start: now.subtract(const Duration(days: 30)),
-      end: now,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appState = ref.watch(appStateProvider);
+    final filter = ref.watch(reportsControllerProvider);
+    final controller = ref.read(reportsControllerProvider.notifier);
+    final model = ref.watch(reportsViewModelProvider);
     final strings = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
-
-    final range = _resolvedRange();
-    final records =
-        appState.records.where((r) => _inRange(r.occurredAt, range)).toList();
-
-    final expenseTotals =
-        _categoryTotals(records, appState, CategoryType.expense);
-    final incomeTotals =
-        _categoryTotals(records, appState, CategoryType.income);
-    final expenseSegments = _buildSegments(expenseTotals);
-    final incomeSegments = _buildSegments(incomeTotals);
-
-    final trend = _buildTrendSeries(records, range);
 
     return SafeArea(
       child: ListView(
@@ -63,10 +29,6 @@ class _ReportsPageState extends State<ReportsPage> {
         children: [
           Row(
             children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Symbols.arrow_back, size: 20),
-              ),
               Expanded(
                 child: Text(
                   strings.reportsAnalysis,
@@ -74,22 +36,18 @@ class _ReportsPageState extends State<ReportsPage> {
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Symbols.more_vert, size: 20),
-              ),
             ],
           ),
           const SizedBox(height: 6),
           _RangeSegments(
-            active: _range,
-            onChanged: (value) => setState(() => _range = value),
+            active: filter.range,
+            onChanged: controller.setRange,
             strings: strings,
           ),
           const SizedBox(height: 12),
           _RangePickerRow(
-            label: _rangeLabel(strings, locale),
-            onTap: () => _pickRange(context),
+            label: _rangeLabel(strings, locale, filter),
+            onTap: () => _pickRange(context, filter, controller),
           ),
           const SizedBox(height: 14),
           _Card(
@@ -99,20 +57,18 @@ class _ReportsPageState extends State<ReportsPage> {
                 Text(strings.expenseBreakdown,
                     style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
-                if (expenseSegments.isEmpty)
+                if (model.expenseSegments.isEmpty)
                   _EmptyChart(label: strings.noData)
                 else
                   _DonutChart(
-                    segments: expenseSegments,
+                    segments: model.expenseSegments,
                     centerLabel: strings.typeExpense,
-                    touchedIndex: _expenseTouchedIndex,
-                    onTouched: (index) => setState(() {
-                      _expenseTouchedIndex = index;
-                    }),
+                    touchedIndex: filter.expenseTouchedIndex,
+                    onTouched: controller.setExpenseTouchedIndex,
                   ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
                 _LegendGrid(
-                  segments: expenseSegments,
+                  segments: model.expenseSegments,
                   locale: locale,
                   currencyCode: appState.currencyCode,
                   decimalDigits: appState.decimalPlaces,
@@ -128,20 +84,18 @@ class _ReportsPageState extends State<ReportsPage> {
                 Text(strings.incomeBreakdown,
                     style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
-                if (incomeSegments.isEmpty)
+                if (model.incomeSegments.isEmpty)
                   _EmptyChart(label: strings.noData)
                 else
                   _DonutChart(
-                    segments: incomeSegments,
+                    segments: model.incomeSegments,
                     centerLabel: strings.typeIncome,
-                    touchedIndex: _incomeTouchedIndex,
-                    onTouched: (index) => setState(() {
-                      _incomeTouchedIndex = index;
-                    }),
+                    touchedIndex: filter.incomeTouchedIndex,
+                    onTouched: controller.setIncomeTouchedIndex,
                   ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
                 _LegendGrid(
-                  segments: incomeSegments,
+                  segments: model.incomeSegments,
                   locale: locale,
                   currencyCode: appState.currencyCode,
                   decimalDigits: appState.decimalPlaces,
@@ -157,10 +111,15 @@ class _ReportsPageState extends State<ReportsPage> {
                 Text(strings.trends,
                     style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
-                if (trend.points.isEmpty)
+                if (model.trend.points.isEmpty)
                   _EmptyChart(label: strings.noData)
                 else
-                  _TrendChart(trend: trend, strings: strings),
+                  _TrendChart(
+                    trend: model.trend,
+                    strings: strings,
+                    locale: locale,
+                    currencyCode: appState.currencyCode,
+                  ),
               ],
             ),
           ),
@@ -173,7 +132,7 @@ class _ReportsPageState extends State<ReportsPage> {
                     style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
                 _RankingList(
-                  items: _topRank(expenseTotals),
+                  items: model.expenseRanking,
                   locale: locale,
                   currencyCode: appState.currencyCode,
                   decimalDigits: appState.decimalPlaces,
@@ -190,7 +149,7 @@ class _ReportsPageState extends State<ReportsPage> {
                     style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
                 _RankingList(
-                  items: _topRank(incomeTotals),
+                  items: model.incomeRanking,
                   locale: locale,
                   currencyCode: appState.currencyCode,
                   decimalDigits: appState.decimalPlaces,
@@ -203,188 +162,58 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
-  DateTimeRange _resolvedRange() {
-    if (_range == ReportRange.month) {
-      final start = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
-      final end = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0);
-      return DateTimeRange(start: start, end: end);
+  String _rangeLabel(
+      AppLocalizations strings, String locale, ReportsFilterState filter) {
+    if (filter.range == ReportRange.month) {
+      return Formatters.monthLabel(filter.selectedMonth, locale: locale);
     }
-    if (_range == ReportRange.year) {
-      final start = DateTime(_selectedYear, 1, 1);
-      final end = DateTime(_selectedYear, 12, 31);
-      return DateTimeRange(start: start, end: end);
+    if (filter.range == ReportRange.year) {
+      return filter.selectedYear.toString();
     }
-    return _customRange ??
-        DateTimeRange(
-          start: DateTime.now().subtract(const Duration(days: 30)),
-          end: DateTime.now(),
-        );
+    return '${Formatters.dateLabel(filter.customRange.start, locale: locale)} - ${Formatters.dateLabel(filter.customRange.end, locale: locale)}';
   }
 
-  bool _inRange(DateTime time, DateTimeRange range) {
-    final day = DateTime(time.year, time.month, time.day);
-    return !day.isBefore(DateTime(range.start.year, range.start.month, range.start.day)) &&
-        !day.isAfter(DateTime(range.end.year, range.end.month, range.end.day));
-  }
-
-  Map<Category, double> _categoryTotals(
-    List<TransactionRecord> records,
-    AppState appState,
-    CategoryType type,
-  ) {
-    final result = <Category, double>{};
-    for (final record in records) {
-      if (type == CategoryType.expense &&
-          record.type != TransactionType.expense) {
-        continue;
-      }
-      if (type == CategoryType.income &&
-          record.type != TransactionType.income) {
-        continue;
-      }
-      final category = appState.categoryById(record.categoryId);
-      if (category == null) continue;
-      result.update(category, (value) => value + record.amount,
-          ifAbsent: () => record.amount);
-    }
-    return result;
-  }
-
-  List<_PieSegment> _buildSegments(Map<Category, double> totals) {
-    final entries = totals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    return entries
-        .map(
-          (e) => _PieSegment(
-            label: e.key.name,
-            value: e.value,
-            color: Color(e.key.colorHex),
-          ),
-        )
-        .toList();
-  }
-
-  List<_RankItem> _topRank(Map<Category, double> totals) {
-    final entries = totals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final top = entries.take(6).toList();
-    if (top.isEmpty) return [];
-    final max = top.first.value <= 0 ? 1.0 : top.first.value;
-    return top
-        .map(
-          (e) => _RankItem(
-            label: e.key.name,
-            amount: e.value,
-            color: Color(e.key.colorHex),
-            ratio: (e.value / max).clamp(0.0, 1.0),
-          ),
-        )
-        .toList();
-  }
-
-  _TrendSeries _buildTrendSeries(
-    List<TransactionRecord> records,
-    DateTimeRange range,
-  ) {
-    final days = range.end.difference(range.start).inDays + 1;
-    final isYear = days > 200;
-    final bucketCount = isYear ? 12 : days;
-    final income = List<double>.filled(bucketCount, 0);
-    final expense = List<double>.filled(bucketCount, 0);
-    final labels = List<String>.filled(bucketCount, '');
-
-    for (final record in records) {
-      if (record.type == TransactionType.transfer) continue;
-      final index = isYear
-          ? record.occurredAt.month - 1
-          : record.occurredAt
-              .difference(DateTime(range.start.year, range.start.month, range.start.day))
-              .inDays;
-      if (index < 0 || index >= bucketCount) continue;
-      if (record.type == TransactionType.income) {
-        income[index] += record.amount;
-      } else {
-        expense[index] += record.amount;
-      }
-    }
-
-    if (isYear) {
-      for (var i = 0; i < bucketCount; i++) {
-        labels[i] = '${i + 1}';
-      }
-    } else {
-      for (var i = 0; i < bucketCount; i++) {
-        final day = DateTime(range.start.year, range.start.month, range.start.day)
-            .add(Duration(days: i));
-        labels[i] = day.day.toString();
-      }
-    }
-
-    final net = List<double>.filled(bucketCount, 0);
-    double running = 0;
-    for (var i = 0; i < bucketCount; i++) {
-      running += income[i] - expense[i];
-      net[i] = running;
-    }
-
-    return _TrendSeries(
-      points: List.generate(bucketCount, (i) => i.toDouble()),
-      income: income,
-      expense: expense,
-      net: net,
-      labels: labels,
-    );
-  }
-
-  String _rangeLabel(AppLocalizations strings, String locale) {
-    if (_range == ReportRange.month) {
-      return Formatters.monthLabel(_selectedMonth, locale: locale);
-    }
-    if (_range == ReportRange.year) {
-      return _selectedYear.toString();
-    }
-    final range = _customRange;
-    if (range == null) return strings.customRange;
-    return '${Formatters.dateLabel(range.start, locale: locale)} - ${Formatters.dateLabel(range.end, locale: locale)}';
-  }
-
-  Future<void> _pickRange(BuildContext context) async {
-    if (_range == ReportRange.month) {
+  Future<void> _pickRange(
+    BuildContext context,
+    ReportsFilterState filter,
+    ReportsController controller,
+  ) async {
+    if (filter.range == ReportRange.month) {
       final picked = await showDatePicker(
         context: context,
-        initialDate: _selectedMonth,
+        initialDate: filter.selectedMonth,
         firstDate: DateTime(2020),
         lastDate: DateTime.now(),
       );
       if (picked != null) {
-        setState(() => _selectedMonth = DateTime(picked.year, picked.month, 1));
+        controller.setMonth(picked);
       }
       return;
     }
-    if (_range == ReportRange.year) {
+
+    if (filter.range == ReportRange.year) {
       final picked = await showDialog<int>(
         context: context,
-        builder: (context) => _YearPickerDialog(initialYear: _selectedYear),
+        builder: (context) =>
+            _YearPickerDialog(initialYear: filter.selectedYear),
       );
       if (picked != null) {
-        setState(() => _selectedYear = picked);
+        controller.setYear(picked);
       }
       return;
     }
+
     final picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      initialDateRange: _customRange,
+      initialDateRange: filter.customRange,
     );
     if (picked != null) {
-      setState(() => _customRange = picked);
+      controller.setCustomRange(picked);
     }
   }
-
 }
-
-enum ReportRange { month, year, custom }
 
 class _RangeSegments extends StatelessWidget {
   const _RangeSegments({
@@ -402,7 +231,7 @@ class _RangeSegments extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2632),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -453,14 +282,16 @@ class _Segment extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF101822) : Colors.transparent,
+          color: selected
+              ? AppTheme.surface(context, level: 2)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: selected ? AppTheme.primary : AppTheme.textMuted,
+            color: selected ? AppTheme.primary : AppTheme.mutedText(context),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -483,18 +314,19 @@ class _RangePickerRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B2632),
+          color: AppTheme.surface(context, level: 0),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            const Icon(Symbols.calendar_month, size: 18, color: AppTheme.textMuted),
+            Icon(Symbols.calendar_month,
+                size: 18, color: AppTheme.mutedText(context)),
             const SizedBox(width: 10),
             Expanded(
               child: Text(label,
                   style: const TextStyle(fontWeight: FontWeight.w600)),
             ),
-            const Icon(Symbols.expand_more, color: AppTheme.textMuted),
+            Icon(Symbols.expand_more, color: AppTheme.mutedText(context)),
           ],
         ),
       ),
@@ -512,7 +344,7 @@ class _Card extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2632),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(16),
       ),
       child: child,
@@ -531,25 +363,14 @@ class _EmptyChart extends StatelessWidget {
       height: 140,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: const Color(0xFF141E2A),
+        color: AppTheme.surface(context, level: 2),
       ),
       child: Center(
-        child: Text(label, style: const TextStyle(color: AppTheme.textMuted)),
+        child:
+            Text(label, style: TextStyle(color: AppTheme.mutedText(context))),
       ),
     );
   }
-}
-
-class _PieSegment {
-  const _PieSegment({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final double value;
-  final Color color;
 }
 
 class _DonutChart extends StatelessWidget {
@@ -560,7 +381,7 @@ class _DonutChart extends StatelessWidget {
     required this.onTouched,
   });
 
-  final List<_PieSegment> segments;
+  final List<ChartSegment> segments;
   final String centerLabel;
   final int? touchedIndex;
   final ValueChanged<int?> onTouched;
@@ -568,34 +389,41 @@ class _DonutChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 180,
-      child: PieChart(
-        PieChartData(
-          sectionsSpace: 2,
-          centerSpaceRadius: 42,
-          startDegreeOffset: -90,
-          sections: [
-            for (var i = 0; i < segments.length; i++)
-              _pieSection(segments[i], i == touchedIndex),
-          ],
-          pieTouchData: PieTouchData(
-            touchCallback: (event, response) {
-              if (!event.isInterestedForInteractions ||
-                  response == null ||
-                  response.touchedSection == null) {
-                onTouched(null);
-                return;
-              }
-              final index = response.touchedSection!.touchedSectionIndex;
-              onTouched(index);
-            },
+      height: 220,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: PieChart(
+          PieChartData(
+            sectionsSpace: 2,
+            centerSpaceRadius: 42,
+            startDegreeOffset: -90,
+            sections: [
+              for (var i = 0; i < segments.length; i++)
+                _pieSection(context, segments[i], i == touchedIndex),
+            ],
+            pieTouchData: PieTouchData(
+              touchCallback: (event, response) {
+                if (!event.isInterestedForInteractions ||
+                    response == null ||
+                    response.touchedSection == null) {
+                  onTouched(null);
+                  return;
+                }
+                final index = response.touchedSection!.touchedSectionIndex;
+                onTouched(index);
+              },
+            ),
           ),
         ),
       ),
     );
   }
 
-  PieChartSectionData _pieSection(_PieSegment segment, bool highlighted) {
+  PieChartSectionData _pieSection(
+    BuildContext context,
+    ChartSegment segment,
+    bool highlighted,
+  ) {
     return PieChartSectionData(
       color: segment.color,
       value: segment.value,
@@ -605,17 +433,20 @@ class _DonutChart extends StatelessWidget {
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFF111A25),
+                color: AppTheme.surface(context, level: 1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: segment.color.withOpacity(0.6)),
+                border: Border.all(color: AppTheme.outline(context)),
               ),
               child: Text(
                 segment.label,
-                style: const TextStyle(fontSize: 11),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             )
           : null,
-      badgePositionPercentageOffset: 1.2,
+      badgePositionPercentageOffset: 1.08,
     );
   }
 }
@@ -628,7 +459,7 @@ class _LegendGrid extends StatelessWidget {
     required this.decimalDigits,
   });
 
-  final List<_PieSegment> segments;
+  final List<ChartSegment> segments;
   final String locale;
   final String currencyCode;
   final int decimalDigits;
@@ -643,7 +474,7 @@ class _LegendGrid extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF141E2A),
+            color: AppTheme.surface(context, level: 2),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
@@ -657,8 +488,10 @@ class _LegendGrid extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(seg.label,
-                  style: const TextStyle(
-                      color: AppTheme.textMuted, fontSize: 12)),
+                  style: TextStyle(
+                    color: AppTheme.mutedText(context),
+                    fontSize: 12,
+                  )),
               const SizedBox(width: 6),
               Text(
                 Formatters.money(
@@ -677,42 +510,34 @@ class _LegendGrid extends StatelessWidget {
   }
 }
 
-class _TrendSeries {
-  const _TrendSeries({
-    required this.points,
-    required this.income,
-    required this.expense,
-    required this.net,
-    required this.labels,
+class _TrendChart extends StatelessWidget {
+  const _TrendChart({
+    required this.trend,
+    required this.strings,
+    required this.locale,
+    required this.currencyCode,
   });
 
-  final List<double> points;
-  final List<double> income;
-  final List<double> expense;
-  final List<double> net;
-  final List<String> labels;
-}
-
-class _TrendChart extends StatelessWidget {
-  const _TrendChart({required this.trend, required this.strings});
-
-  final _TrendSeries trend;
+  final TrendSeries trend;
   final AppLocalizations strings;
+  final String locale;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
-    final spotsIncome =
-        List.generate(trend.income.length, (i) => FlSpot(i.toDouble(), trend.income[i]));
-    final spotsExpense =
-        List.generate(trend.expense.length, (i) => FlSpot(i.toDouble(), trend.expense[i]));
-    final spotsNet =
-        List.generate(trend.net.length, (i) => FlSpot(i.toDouble(), trend.net[i]));
+    final spotsIncome = List.generate(
+        trend.income.length, (i) => FlSpot(i.toDouble(), trend.income[i]));
+    final spotsExpense = List.generate(
+        trend.expense.length, (i) => FlSpot(i.toDouble(), trend.expense[i]));
+    final spotsNet = List.generate(
+        trend.net.length, (i) => FlSpot(i.toDouble(), trend.net[i]));
     final allValues = [...trend.income, ...trend.expense, ...trend.net];
     final minValue = allValues.isEmpty ? 0.0 : allValues.reduce(min);
     final maxValue = allValues.isEmpty ? 0.0 : allValues.reduce(max);
     final padding = (maxValue - minValue) * 0.1;
     final minY = minValue - padding;
     final maxY = maxValue + padding;
+    final yInterval = _yInterval(minY, maxY);
 
     return Column(
       children: [
@@ -724,8 +549,28 @@ class _TrendChart extends StatelessWidget {
               maxY: maxY,
               gridData: FlGridData(show: true, drawVerticalLine: false),
               titlesData: FlTitlesData(
-                leftTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 64,
+                    interval: yInterval,
+                    getTitlesWidget: (value, meta) {
+                      return SideTitleWidget(
+                        axisSide: meta.axisSide,
+                        child: Text(
+                          _compactYAxisMoney(
+                            value,
+                            locale: locale,
+                            currencyCode: currencyCode,
+                          ),
+                          style: TextStyle(
+                            color: AppTheme.mutedText(context),
+                            fontSize: 10,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 topTitles: const AxisTitles(
                   sideTitles: SideTitles(showTitles: false),
@@ -747,8 +592,8 @@ class _TrendChart extends StatelessWidget {
                         axisSide: meta.axisSide,
                         child: Text(
                           trend.labels[index],
-                          style: const TextStyle(
-                            color: AppTheme.textMuted,
+                          style: TextStyle(
+                            color: AppTheme.mutedText(context),
                             fontSize: 10,
                           ),
                         ),
@@ -769,8 +614,11 @@ class _TrendChart extends StatelessWidget {
                           : item.barIndex == 1
                               ? strings.trendExpense
                               : strings.trendNet;
+                      final value = item.barIndex == 2
+                          ? trend.netAbsolute[item.x.toInt()]
+                          : item.y;
                       return LineTooltipItem(
-                        '$label: ${item.y.toStringAsFixed(2)}',
+                        '$label: ${value.toStringAsFixed(2)}',
                         const TextStyle(color: Colors.white, fontSize: 11),
                       );
                     }).toList();
@@ -789,9 +637,11 @@ class _TrendChart extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _LegendDot(color: const Color(0xFF34D399), label: strings.trendIncome),
+            _LegendDot(
+                color: const Color(0xFF34D399), label: strings.trendIncome),
             const SizedBox(width: 12),
-            _LegendDot(color: const Color(0xFFF87171), label: strings.trendExpense),
+            _LegendDot(
+                color: const Color(0xFFF87171), label: strings.trendExpense),
             const SizedBox(width: 12),
             _LegendDot(color: const Color(0xFF60A5FA), label: strings.trendNet),
           ],
@@ -819,6 +669,40 @@ double _labelInterval(int count) {
   return max(1, (count / 6).ceilToDouble());
 }
 
+double _yInterval(double minY, double maxY) {
+  final range = (maxY - minY).abs();
+  if (range <= 0) return 1;
+  final raw = range / 4;
+  final magnitude = pow(10, (log(raw) / ln10).floor()).toDouble();
+  final normalized = raw / magnitude;
+  final nice = normalized >= 5
+      ? 5
+      : normalized >= 2
+          ? 2
+          : 1;
+  return nice * magnitude;
+}
+
+String _compactYAxisMoney(
+  double value, {
+  required String locale,
+  required String currencyCode,
+}) {
+  final symbol = Formatters.currencySymbol(currencyCode, locale);
+  final sign = value < 0 ? '-' : '';
+  final abs = value.abs();
+  if (abs >= 1000000000) {
+    return '$sign$symbol${(abs / 1000000000).toStringAsFixed(1)}B';
+  }
+  if (abs >= 1000000) {
+    return '$sign$symbol${(abs / 1000000).toStringAsFixed(1)}M';
+  }
+  if (abs >= 1000) {
+    return '$sign$symbol${(abs / 1000).toStringAsFixed(1)}K';
+  }
+  return '$sign$symbol${abs.toStringAsFixed(0)}';
+}
+
 class _LegendDot extends StatelessWidget {
   const _LegendDot({required this.color, required this.label});
 
@@ -835,7 +719,8 @@ class _LegendDot extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+        Text(label,
+            style: TextStyle(color: AppTheme.mutedText(context), fontSize: 12)),
       ],
     );
   }
@@ -849,7 +734,7 @@ class _RankingList extends StatelessWidget {
     required this.decimalDigits,
   });
 
-  final List<_RankItem> items;
+  final List<RankingItem> items;
   final String locale;
   final String currencyCode;
   final int decimalDigits;
@@ -858,7 +743,7 @@ class _RankingList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) {
       return Text(AppLocalizations.of(context).noData,
-          style: const TextStyle(color: AppTheme.textMuted));
+          style: TextStyle(color: AppTheme.mutedText(context)));
     }
     return Column(
       children: items.map((item) {
@@ -885,7 +770,7 @@ class _RankingList extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: item.ratio,
                         minHeight: 6,
-                        backgroundColor: const Color(0xFF263241),
+                        backgroundColor: AppTheme.surface(context, level: 3),
                         color: item.color,
                       ),
                     ),
@@ -908,20 +793,6 @@ class _RankingList extends StatelessWidget {
       }).toList(),
     );
   }
-}
-
-class _RankItem {
-  const _RankItem({
-    required this.label,
-    required this.amount,
-    required this.color,
-    required this.ratio,
-  });
-
-  final String label;
-  final double amount;
-  final Color color;
-  final double ratio;
 }
 
 class _YearPickerDialog extends StatefulWidget {

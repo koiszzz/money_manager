@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
 import '../l10n/app_localizations.dart';
-import 'main_page.dart';
+import '../router/app_router.dart';
 
 class PinLockPage extends StatefulWidget {
   const PinLockPage({super.key});
@@ -42,9 +43,7 @@ class _PinLockPageState extends State<PinLockPage> {
     final appState = context.read<AppState>();
     if (pin == appState.pinCode) {
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainPage()),
-      );
+      context.go(AppRoutes.main);
     } else {
       _failedAttempts += 1;
       setState(() => _digits.clear());
@@ -59,8 +58,8 @@ class _PinLockPageState extends State<PinLockPage> {
         }
       }
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).pinError)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).pinError)));
       }
     }
   }
@@ -100,7 +99,8 @@ class _PinLockPageState extends State<PinLockPage> {
                       color: const Color(0xFF1B2632),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Symbols.lock, color: Colors.white, size: 18),
+                    child:
+                        const Icon(Symbols.lock, color: Colors.white, size: 18),
                   ),
                   const SizedBox(width: 8),
                   const Text('Bookkeeper Pro',
@@ -122,12 +122,11 @@ class _PinLockPageState extends State<PinLockPage> {
               ),
               const SizedBox(height: 24),
               Text(strings.welcomeBack.trim(),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               Text(
-                _cooldown
-                    ? strings.pleaseWait
-                    : strings.enterPin,
+                _cooldown ? strings.pleaseWait : strings.enterPin,
                 style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
               ),
               const SizedBox(height: 20),
@@ -140,9 +139,12 @@ class _PinLockPageState extends State<PinLockPage> {
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: filled ? const Color(0xFF2B7CEE) : Colors.transparent,
+                      color:
+                          filled ? const Color(0xFF2B7CEE) : Colors.transparent,
                       border: Border.all(
-                        color: filled ? const Color(0xFF2B7CEE) : Colors.grey.shade500,
+                        color: filled
+                            ? const Color(0xFF2B7CEE)
+                            : Colors.grey.shade500,
                         width: 2,
                       ),
                       shape: BoxShape.circle,

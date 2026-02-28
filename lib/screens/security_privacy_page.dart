@@ -15,7 +15,7 @@ class SecurityPrivacyPage extends StatelessWidget {
     final appState = context.watch<AppState>();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -26,7 +26,8 @@ class SecurityPrivacyPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(strings.securityHeroTitle,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 6),
             Text(strings.securityHeroSubtitle,
                 style: const TextStyle(color: AppTheme.textMuted)),
@@ -66,7 +67,8 @@ class SecurityPrivacyPage extends StatelessWidget {
                 title: strings.screenshotProtection,
                 subtitle: strings.screenshotProtectionDesc,
                 value: appState.screenshotProtectionEnabled,
-                onChanged: (value) => appState.toggleScreenshotProtection(value),
+                onChanged: (value) =>
+                    appState.toggleScreenshotProtection(value),
               ),
             ]),
             const SizedBox(height: 16),
@@ -190,7 +192,8 @@ class _SecurityLevelCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(AppLocalizations.of(context).securityLevel,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    style: const TextStyle(
+                        color: AppTheme.textMuted, fontSize: 12)),
                 const SizedBox(height: 6),
                 Text(level,
                     style: const TextStyle(
@@ -207,7 +210,8 @@ class _SecurityLevelCard extends StatelessWidget {
               color: AppTheme.primary.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Symbols.shield_lock, color: AppTheme.primary, size: 30),
+            child: const Icon(Symbols.shield_lock,
+                color: AppTheme.primary, size: 30),
           ),
         ],
       ),
@@ -241,9 +245,9 @@ class _GroupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1C262E),
+        color: AppTheme.surface(context, level: 0),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: AppTheme.outline(context)),
       ),
       child: Column(children: children),
     );
@@ -269,11 +273,12 @@ class _SwitchTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: const Color(0xFF2B3440),
+        backgroundColor: AppTheme.surface(context, level: 2),
         child: Icon(icon, color: Colors.white),
       ),
       title: Text(title),
-      subtitle: Text(subtitle, style: const TextStyle(color: AppTheme.textMuted)),
+      subtitle:
+          Text(subtitle, style: const TextStyle(color: AppTheme.textMuted)),
       trailing: Switch(value: value, onChanged: onChanged),
     );
   }
@@ -296,12 +301,13 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: const Color(0xFF2B3440),
+        backgroundColor: AppTheme.surface(context, level: 2),
         child: Icon(icon, color: Colors.white),
       ),
       title: Text(title),
-      subtitle:
-          subtitle == null ? null : Text(subtitle!, style: const TextStyle(color: AppTheme.textMuted)),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle!, style: const TextStyle(color: AppTheme.textMuted)),
       trailing: const Icon(Symbols.chevron_right, color: AppTheme.textMuted),
       onTap: onTap,
     );
